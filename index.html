@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แอปตารางเรียนและการบ้าน (เวอร์ชันระบุรหัสวิชา)</title>
+    <title>แอปตารางเรียนและการบ้าน ม.2/4 (ข้อมูลพร้อมใช้งาน)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-slate-100 min-h-screen p-4 md:p-6">
 
     <div class="max-w-4xl mx-auto">
         
+        <!-- ส่วนหัวแอป -->
         <header class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-slate-800">📅 Class & Homework Tracker</h1>
-                <p class="text-sm text-gray-500">จัดการตารางเรียน งานค้าง และรหัสวิชา</p>
+                <p class="text-sm text-gray-500">ตารางเรียน ชั้น ม. 2/4 ห้องประจำ 646 (ภาคเรียนที่ 1/2569)</p>
             </div>
             <div class="flex gap-2">
                 <button id="openScheduleBtn" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 rounded-xl shadow-md transition cursor-pointer text-sm">
@@ -25,6 +26,7 @@
             </div>
         </header>
 
+        <!-- 📅 แถบเมนูเลือกวันประจำสัปดาห์ -->
         <nav class="flex bg-white p-2 rounded-2xl shadow-md mb-6 overflow-x-auto gap-2 border border-slate-200">
             <button onclick="selectDay('Monday')" id="tab-Monday" class="day-tab flex-1 min-w-[100px] text-center py-3 rounded-xl font-black text-sm transition-all duration-200 cursor-pointer shadow-xs">
                 💛 วันจันทร์
@@ -43,13 +45,16 @@
             </button>
         </nav>
 
+        <!-- ส่วนเนื้อหาหลัก -->
         <main class="grid grid-cols-1 md:grid-cols-5 gap-6">
             
+            <!-- ฝั่งตารางเรียน -->
             <section class="md:col-span-2 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">📖 ตารางเรียน</h2>
                 <div id="scheduleList" class="space-y-3"></div>
             </section>
 
+            <!-- ฝั่งการบ้าน -->
             <section class="md:col-span-3 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">🔥 การบ้านค้างส่ง</h2>
                 <div id="homeworkList" class="space-y-3"></div>
@@ -58,6 +63,7 @@
         </main>
     </div>
 
+    <!-- ป๊อปอัปที่ 1: เพิ่มวิชาเรียน -->
     <div id="scheduleModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
             <h3 class="text-xl font-bold text-gray-800 mb-4">เพิ่มวิชาในตารางเรียน</h3>
@@ -72,19 +78,17 @@
                         <option value="Friday">วันศุกร์</option>
                     </select>
                 </div>
-                
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">รหัสวิชา</label>
-                    <input type="text" id="classCodeInput" placeholder="เช่น ค31101, ENG201" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none uppercase">
+                    <input type="text" id="classCodeInput" placeholder="เช่น ท22101" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none uppercase">
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อวิชา</label>
-                    <input type="text" id="classNameInput" required placeholder="เช่น ฟิสิกส์, ภาษาไทย" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none">
+                    <input type="text" id="classNameInput" required placeholder="เช่น ภาษาไทย" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อครูผู้สอนประจำวิชา</label>
-                    <input type="text" id="classTeacherInput" placeholder="เช่น ครูสมชาย, Aj. Sarah" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none">
+                    <input type="text" id="classTeacherInput" placeholder="เช่น ครูสมชาย" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
@@ -104,6 +108,7 @@
         </div>
     </div>
 
+    <!-- ป๊อปอัปที่ 2: เพิ่มการบ้าน -->
     <div id="homeworkModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
             <h3 class="text-xl font-bold text-gray-800 mb-4">เพิ่มการบ้านใหม่</h3>
@@ -141,9 +146,71 @@
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- ส่วนของ JavaScript -->
+    <!-- ========================================== -->
     <script>
         let currentSelectedDay = 'Monday';
-        let schedules = JSON.parse(localStorage.getItem('schedulesData')) || [];
+
+        // 🌟 ชุดข้อมูลตารางเรียนเริ่มต้น ดึงถอดรหัสมาจากภาพ S__11984913.jpg ครบทุกวิชา
+        const defaultSchedules = [
+            // วันจันทร์
+            { id: 1, day: "Monday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "08:20", end: "09:10" },
+            { id: 2, day: "Monday", code: "อ22209", name: "ภาษาอังกฤษ", teacher: "ครูNathan", start: "09:10", end: "10:00" },
+            { id: 3, day: "Monday", code: "ว22101", name: "วิทยาศาสตร์", teacher: "ครูรัตนกร", start: "10:00", end: "10:50" },
+            { id: 4, day: "Monday", code: "ว22222", name: "วิทยาศาสตร์เพิ่มเติม", teacher: "ครูณัฐวุฒิ", start: "11:40", end: "12:30" },
+            { id: 5, day: "Monday", code: "ว22222", name: "วิทยาศาสตร์เพิ่มเติม", teacher: "ครูณัฐวุฒิ", start: "12:30", end: "13:20" },
+            { id: 6, day: "Monday", code: "ค22213", name: "คณิตศาสตร์เพิ่มเติม", teacher: "ครูอุทุมพร", start: "13:20", end: "14:10" },
+            { id: 7, day: "Monday", code: "I20201", name: "IS1", teacher: "ครูอุทุมพร", start: "14:10", end: "15:00" },
+            { id: 8, day: "Monday", code: "พ22103", name: "พลศึกษา", teacher: "ครูอดิศร", start: "15:00", end: "15:50" },
+
+            // วันอังคาร
+            { id: 9,  day: "Tuesday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "08:20", end: "09:10" },
+            { id: 10, day: "Tuesday", code: "ง22101", name: "การงานอาชีพ", teacher: "ครูสุพิชชา", start: "09:10", end: "10:00" },
+            { id: 11, day: "Tuesday", code: "ง22101", name: "การงานอาชีพ", teacher: "ครูสุพิชชา", start: "10:00", end: "10:50" },
+            { id: 12, day: "Tuesday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "11:40", end: "12:30" },
+            { id: 13, day: "Tuesday", code: "ศ22101", name: "ศิลปะ/ดนตรี", teacher: "ครูสมฤกษ์", start: "12:30", end: "13:20" },
+            { id: 14, day: "Tuesday", code: "สาธารณะฯ", name: "กิจกรรมสาธารณประโยชน์", teacher: "คุณธรรม", start: "13:20", end: "14:10" },
+            { id: 15, day: "Tuesday", code: "ลส./นน.", name: "ลูกเสือ/เนตรนารี", teacher: "ยุวกาชาด", start: "14:10", end: "15:00" },
+            { id: 16, day: "Tuesday", code: "ก22905", name: "แนะแนว", teacher: "ครูธีราพร", start: "15:00", end: "15:50" },
+
+            // วันพุธ
+            { id: 17, day: "Wednesday", code: "ENG SCI", name: "English Science", teacher: "ครูStephani", start: "08:20", end: "09:10" },
+            { id: 18, day: "Wednesday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "09:10", end: "10:00" },
+            { id: 19, day: "Wednesday", code: "ค22213", name: "คณิตศาสตร์เพิ่มเติม", teacher: "ครูอุทุมพร", start: "10:00", end: "10:50" },
+            { id: 20, day: "Wednesday", code: "อ22101", name: "ภาษาอังกฤษพื้นฐาน", teacher: "ครูดวงเดอ", start: "11:40", end: "12:30" },
+            { id: 21, day: "Wednesday", code: "พ22101", name: "สุขศึกษา", teacher: "ครูอภัสรา", start: "12:30", end: "13:20" },
+            { id: 22, day: "Wednesday", code: "ค22101", name: "คณิตศาสตร์พื้นฐาน", teacher: "ครูภัสรดา", start: "13:20", end: "14:10" },
+            { id: 23, day: "Wednesday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "14:10", end: "15:00" },
+            { id: 24, day: "Wednesday", code: "ENG CON", name: "English Conversation", teacher: "ครูNathan", start: "15:00", end: "15:50" },
+
+            // วันพฤหัสบดี
+            { id: 25, day: "Thursday", code: "ว22101", name: "วิทยาศาสตร์พื้นฐาน", teacher: "ครูรัตนกร", start: "08:20", end: "09:10" },
+            { id: 26, day: "Thursday", code: "ว22101", name: "วิทยาศาสตร์พื้นฐาน", teacher: "ครูรัตนกร", start: "09:10", end: "10:00" },
+            { id: 27, day: "Thursday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "10:00", end: "10:50" },
+            { id: 28, day: "Thursday", code: "ค22101", name: "คณิตศาสตร์พื้นฐาน", teacher: "ครูภัสรดา", start: "11:40", end: "12:30" },
+            { id: 29, day: "Thursday", code: "อ22101", name: "ภาษาอังกฤษพื้นฐาน", teacher: "ครูดวงเดอ", start: "12:30", end: "13:20" },
+            { id: 30, day: "Thursday", code: "ค22213", name: "คณิตศาสตร์เพิ่มเติม", teacher: "ครูอุทุมพร", start: "13:20", end: "14:10" },
+            { id: 31, day: "Thursday", code: "ส22103", name: "ประวัติศาสตร์", teacher: "ครูนิรุช", start: "14:10", end: "15:00" },
+            { id: 32, day: "Thursday", code: "I20201", name: "IS1", teacher: "ครูอุทุมพร", start: "15:00", end: "15:50" },
+
+            // วันศุกร์
+            { id: 33, day: "Friday", code: "ว22227", name: "วิทยาการคำนวณ", teacher: "ครูจีระศักดิ์", start: "08:20", end: "09:10" },
+            { id: 34, day: "Friday", code: "ว22227", name: "วิทยาการคำนวณ", teacher: "ครูจีระศักดิ์", start: "09:10", end: "10:00" },
+            { id: 35, day: "Friday", code: "ศ22101", name: "ศิลปะ/นาฏศิลป์", teacher: "ครูวีณา", start: "10:00", end: "10:50" },
+            { id: 36, day: "Friday", code: "ค22101", name: "คณิตศาสตร์พื้นฐาน", teacher: "ครูภัสรดา", start: "11:40", end: "12:30" },
+            { id: 37, day: "Friday", code: "อ22101", name: "ภาษาอังกฤษพื้นฐาน", teacher: "ครูดวงเดอ", start: "12:30", end: "13:20" },
+            { id: 38, day: "Friday", code: "PISA", name: "เตรียมความพร้อม PISA", teacher: "ครูผู้สอน", start: "13:20", end: "14:10" },
+            { id: 39, day: "Friday", code: "ชุมนุม", name: "กิจกรรมชุมนุม", teacher: "ครูผู้สอน", start: "14:10", end: "15:00" },
+            { id: 40, day: "Friday", code: "ประชุม", name: "ประชุมคณะสี", teacher: "คุณครู", start: "15:00", end: "15:50" }
+        ];
+
+        // ระบบตรวจสอบ: ถ้า LocalStorage ยังว่างเปล่า ให้เอาชุดข้อมูล ม.2/4 ยัดเข้าไปเป็นค่าตั้งต้นทันที
+        if (!localStorage.getItem('schedulesData') || JSON.parse(localStorage.getItem('schedulesData')).length === 0) {
+            localStorage.setItem('schedulesData', JSON.stringify(defaultSchedules));
+        }
+
+        let schedules = JSON.parse(localStorage.getItem('schedulesData'));
         let homeworks = JSON.parse(localStorage.getItem('homeworksData')) || [];
 
         const dayStyles = {
@@ -177,13 +244,12 @@
             renderHomework();
         }
 
-        // บันทึกวิชาเรียน (เซฟรหัสวิชาเพิ่มเข้าไป)
+        // บันทึกวิชาเรียนเพิ่มเติม
         document.getElementById('scheduleForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const newClass = {
                 id: Date.now(),
                 day: document.getElementById('classDayInput').value,
-                // 🌟 เก็บข้อมูลรหัสวิชา ถ้าไม่กรอกจะใส่ค่าว่างไว้
                 code: document.getElementById('classCodeInput').value.trim().toUpperCase(),
                 name: document.getElementById('classNameInput').value,
                 teacher: document.getElementById('classTeacherInput').value.trim() || 'ไม่ระบุชื่อครู',
@@ -223,7 +289,7 @@
             renderHomework();
         });
 
-        // วาดตารางเรียน (แสดงรหัสวิชาคู่กับชื่อวิชา)
+        // วาดตารางเรียน
         function renderSchedule() {
             const container = document.getElementById('scheduleList');
             const todayClasses = schedules.filter(c => c.day === currentSelectedDay);
@@ -236,7 +302,6 @@
             const currentDayColor = dayStyles[currentSelectedDay];
 
             container.innerHTML = todayClasses.map(c => {
-                // 🌟 ป้ายรหัสวิชา ถ้ามีให้โชว์แท็กสีเทา/ดำเก๋ๆ ถ้าไม่มีก็ไม่ต้องโชว์
                 const codeBadge = c.code 
                     ? `<span class="bg-slate-200 text-slate-700 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded mr-1.5">${c.code}</span>` 
                     : '';
@@ -294,7 +359,6 @@
             }).join('');
         }
 
-        // 🌟 อัปเดตตัวเลือกวิชาในฟอร์มการบ้าน ให้แสดงรหัสวิชานำหน้าด้วย (ถ้ามี)
         function updateHomeworkSubjectSelect() {
             const select = document.getElementById('hwSubjectSelect');
             const todayClasses = schedules.filter(c => c.day === currentSelectedDay);
@@ -303,11 +367,8 @@
                 select.innerHTML = `<option value="วิชาทั่วไป|ไม่ระบุชื่อครู">วิชาทั่วไป (ยังไม่ได้เพิ่มวิชาเรียน)</option>`;
             } else {
                 select.innerHTML = todayClasses.map(c => {
-                    // ถ้าระบุรหัสวิชา ให้แสดงเป็น "[รหัส] ชื่อวิชา (ครู)" ถ้าไม่มีก็แสดงแค่ ชื่อวิชา (ครู)
                     const displayLabel = c.code ? `[${c.code}] ${c.name}` : c.name;
-                    return `
-                        <option value="${c.name}|${c.teacher}">${displayLabel} (${c.teacher})</option>
-                    `;
+                    return `<option value="${c.name}|${c.teacher}">${displayLabel} (${c.teacher})</option>`;
                 }).join('');
             }
         }
