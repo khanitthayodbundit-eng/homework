@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แอปตารางเรียนและการบ้าน ม.2/4 (เวอร์ชันแก้ไขการบ้าน + แทร็กสถานะ)</title>
+    <title>แอปตารางเรียนและการบ้าน ม.2/4 (เวอร์ชันเพิ่มสมาชิกกลุ่ม)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 md:p-6">
+<body class="bg-slate-100 min-h-screen p-4 md:p-6 pb-20">
 
     <div class="max-w-4xl mx-auto">
         
         <header class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-slate-800">📅 Class & Homework Tracker</h1>
-                <p class="text-sm text-gray-500">ตารางเรียน ชั้น ม. 2/4 ห้องประจำ 646 (แก้ไขตารางเรียน การบ้าน และติดตามสถานะได้)</p>
+                <p class="text-sm text-gray-500">ตารางเรียน ชั้น ม. 2/4 ห้องประจำ 646 (รองรับการใส่รายชื่อสมาชิกงานกลุ่ม)</p>
             </div>
             <div class="flex gap-2">
-                <button id="openScheduleBtn" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 rounded-xl shadow-md transition cursor-pointer text-sm">
-                    + เพิ่มวิชาเรียน
+                <button id="openScheduleBtn" class="hidden bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 rounded-xl shadow-md transition cursor-pointer text-sm">
+                    + เพิ่มวิชาเรียน (Admin)
                 </button>
                 <button id="openHomeworkBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-xl shadow-md transition cursor-pointer text-sm">
                     + เพิ่มการบ้าน
@@ -56,6 +56,14 @@
             </section>
 
         </main>
+    </div>
+
+    <div class="fixed bottom-4 right-4 bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-2 z-40">
+        <span class="text-xs font-bold text-gray-500 pl-2">สิทธิ์ผู้ใช้:</span>
+        <select id="roleSelector" onchange="changeRole(this.value)" class="text-xs font-bold px-2 py-1.5 rounded-xl border border-slate-200 focus:outline-none cursor-pointer bg-slate-50">
+            <option value="user">👤 คนทั่วไป (User)</option>
+            <option value="admin">🔑 ผู้ดูแลระบบ (Admin)</option>
+        </select>
     </div>
 
     <div id="scheduleModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -104,11 +112,10 @@
     </div>
 
     <div id="homeworkModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl overflow-y-auto max-h-[90vh]">
             <h3 id="homeworkModalTitle" class="text-xl font-bold text-gray-800 mb-4">เพิ่มการบ้านใหม่</h3>
             <form id="homeworkForm" class="space-y-4">
                 <input type="hidden" id="hwIdInput">
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">วิชาที่สั่งงาน (ครูผู้สอน)</label>
                     <select id="hwSubjectSelect" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none"></select>
@@ -117,13 +124,25 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทงาน</label>
                     <div class="flex gap-4">
                         <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                            <input type="radio" name="workType" value="single" checked class="w-4 h-4 accent-indigo-600">
+                            <input type="radio" name="workType" value="single" checked onchange="toggleGroupFields(this.value)" class="w-4 h-4 accent-indigo-600">
                             👤 งานเดี่ยว
                         </label>
                         <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                            <input type="radio" name="workType" value="group" class="w-4 h-4 accent-indigo-600">
+                            <input type="radio" name="workType" value="group" onchange="toggleGroupFields(this.value)" class="w-4 h-4 accent-indigo-600">
                             👥 งานกลุ่ม
                         </label>
+                    </div>
+                </div>
+
+                <div id="groupFieldsSection" class="hidden p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                    <p class="text-xs font-bold text-indigo-600">👥 ข้อมูลรายละเอียดสมาชิกกลุ่ม</p>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">จำนวนสมาชิกในกลุ่ม (คน)</label>
+                        <input type="number" id="groupCountInput" min="1" placeholder="เช่น 5" class="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-xl focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">รายชื่อสมาชิก / เลขที่</label>
+                        <textarea id="groupMembersInput" placeholder="เช่น นายเอ (เลขที่ 1), นายบี (เลขที่ 2)" rows="2" class="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-xl focus:outline-none"></textarea>
                     </div>
                 </div>
 
@@ -135,7 +154,6 @@
                         <option value="done">🟢 เสร็จเรียบร้อยแล้ว</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียดงาน</label>
                     <textarea id="hwTitleInput" required placeholder="สั่งให้ทำอะไร..." rows="3" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none"></textarea>
@@ -154,6 +172,7 @@
 
     <script>
         let currentSelectedDay = 'Monday';
+        let currentUserRole = 'user'; 
 
         const defaultSchedules = [
             { id: 1, day: "Monday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "08:20", end: "09:10" },
@@ -213,30 +232,52 @@
             Friday:    { active: 'bg-sky-500 text-white border-sky-600 scale-105', border: 'border-l-sky-500', bg: 'bg-sky-50/50' }
         };
 
-        // เปิดป๊อปอัปเพิ่มวิชาเรียน
+        // ฟังก์ชันเปิด/ซ่อนฟิลด์ของงานกลุ่ม
+        function toggleGroupFields(type) {
+            const section = document.getElementById('groupFieldsSection');
+            if (type === 'group') {
+                section.classList.remove('hidden');
+            } else {
+                section.classList.add('hidden');
+                document.getElementById('groupCountInput').value = '';
+                document.getElementById('groupMembersInput').value = '';
+            }
+        }
+
+        function changeRole(role) {
+            currentUserRole = role;
+            const openScheduleBtn = document.getElementById('openScheduleBtn');
+            if (role === 'admin') {
+                openScheduleBtn.classList.remove('hidden');
+            } else {
+                openScheduleBtn.classList.add('hidden');
+            }
+            renderSchedule();
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
         document.getElementById('openScheduleBtn').addEventListener('click', () => {
+            if (currentUserRole !== 'admin') return;
             document.getElementById('scheduleForm').reset();
             document.getElementById('classIdInput').value = '';
             document.getElementById('scheduleModalTitle').innerText = 'เพิ่มวิชาในตารางเรียน';
-            document.getElementById('scheduleSubmitBtn').innerText = 'บันทึกวิชา';
             document.getElementById('classDayInput').value = currentSelectedDay;
             openModal('scheduleModal');
         });
 
-        // ปุ่มเปิดป๊อปอัปเพิ่มการบ้าน (รีเซ็ตเป็นโหมดเพิ่มปกติ)
         document.getElementById('openHomeworkBtn').addEventListener('click', () => {
             document.getElementById('homeworkForm').reset();
-            document.getElementById('hwIdInput').value = ''; // ล้าง ID การบ้าน
+            document.getElementById('hwIdInput').value = ''; 
             document.getElementById('homeworkModalTitle').innerText = 'เพิ่มการบ้านใหม่';
             document.getElementById('homeworkSubmitBtn').innerText = 'บันทึกงาน';
             document.querySelector('input[name="workType"][value="single"]').checked = true;
-            document.getElementById('hwStatusSelect').value = 'todo'; // เริ่มต้นที่ยังไม่ทำ
+            toggleGroupFields('single');
+            document.getElementById('hwStatusSelect').value = 'todo'; 
             updateHomeworkSubjectSelect();
             openModal('homeworkModal');
         });
-
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function selectDay(day) {
             currentSelectedDay = day;
@@ -252,9 +293,11 @@
             renderHomework();
         }
 
-        // บันทึก/แก้ไข วิชาเรียน
+        // จัดการตารางเรียน (Admin)
         document.getElementById('scheduleForm').addEventListener('submit', (e) => {
             e.preventDefault();
+            if (currentUserRole !== 'admin') return;
+
             const idValue = document.getElementById('classIdInput').value;
             const inputDay = document.getElementById('classDayInput').value;
 
@@ -276,12 +319,12 @@
             }
 
             localStorage.setItem('schedulesData', JSON.stringify(schedules));
-            document.getElementById('scheduleForm').reset();
             closeModal('scheduleModal');
             selectDay(inputDay);
         });
 
         function openEditSchedule(id) {
+            if (currentUserRole !== 'admin') return;
             const currentClass = schedules.find(c => c.id === id);
             if (!currentClass) return;
 
@@ -294,11 +337,19 @@
             document.getElementById('endTimeInput').value = currentClass.end;
 
             document.getElementById('scheduleModalTitle').innerText = '✏️ แก้ไขข้อมูลวิชาเรียน';
-            document.getElementById('scheduleSubmitBtn').innerText = 'บันทึกการแก้ไข';
             openModal('scheduleModal');
         }
 
-        // 🌟 บันทึก/แก้ไข การบ้าน (รองรับโหมดบันทึกแก้ไขทับและสถานะ)
+        function deleteSchedule(id) {
+            if (currentUserRole !== 'admin') return;
+            if (confirm("คุณต้องการลบวิชานี้ออกจากตารางเรียนใช่หรือไม่?")) {
+                schedules = schedules.filter(c => c.id !== id);
+                localStorage.setItem('schedulesData', JSON.stringify(schedules));
+                renderSchedule();
+            }
+        }
+
+        // จัดการการบ้าน (ทุกคนใช้ได้ + บันทึกข้อมูลกลุ่ม)
         document.getElementById('homeworkForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const hwId = document.getElementById('hwIdInput').value;
@@ -311,49 +362,51 @@
                 subject: subjectName,
                 teacher: teacherName,
                 type: selectedType,
-                status: document.getElementById('hwStatusSelect').value, // ดึงค่าสถานะงาน
+                status: document.getElementById('hwStatusSelect').value, 
                 title: document.getElementById('hwTitleInput').value.trim(),
-                date: document.getElementById('hwDateInput').value
+                date: document.getElementById('hwDateInput').value,
+                // เก็บค่าสมาชิกหากเป็นงานกลุ่ม
+                groupCount: selectedType === 'group' ? document.getElementById('groupCountInput').value : '',
+                groupMembers: selectedType === 'group' ? document.getElementById('groupMembersInput').value.trim() : ''
             };
 
             if (hwId) {
-                // โหมดแก้ไข: อัปเดตทับข้อมูลเดิม
                 const index = homeworks.findIndex(h => h.id === parseInt(hwId));
                 if (index !== -1) homeworks[index] = { ...homeworks[index], ...hwData };
             } else {
-                // โหมดเพิ่มใหม่
                 hwData.id = Date.now();
                 homeworks.unshift(hwData);
             }
 
             localStorage.setItem('homeworksData', JSON.stringify(homeworks));
-            document.getElementById('homeworkForm').reset();
             closeModal('homeworkModal');
             renderHomework();
         });
 
-        // 🌟 เปิดป๊อปอัปเพื่อแก้ไขการบ้าน
         function openEditHomework(id) {
             const hw = homeworks.find(h => h.id === id);
             if (!hw) return;
 
             updateHomeworkSubjectSelect();
 
-            // นำข้อมูลชุดเดิมไปสวมค่าในหน้าฟอร์ม
             document.getElementById('hwIdInput').value = hw.id;
             document.getElementById('hwSubjectSelect').value = `${hw.subject}|${hw.teacher}`;
             document.querySelector(`input[name="workType"][value="${hw.type}"]`).checked = true;
+            
+            toggleGroupFields(hw.type);
+            if(hw.type === 'group') {
+                document.getElementById('groupCountInput').value = hw.groupCount || '';
+                document.getElementById('groupMembersInput').value = hw.groupMembers || '';
+            }
+
             document.getElementById('hwStatusSelect').value = hw.status || 'todo';
             document.getElementById('hwTitleInput').value = hw.title;
             document.getElementById('hwDateInput').value = hw.date;
 
             document.getElementById('homeworkModalTitle').innerText = '✏️ แก้ไขข้อมูลการบ้าน';
-            document.getElementById('homeworkSubmitBtn').innerText = 'บันทึกการแก้ไข';
-
             openModal('homeworkModal');
         }
 
-        // 🌟 ทางลัดกดเปลี่ยนสถานะเป็น "เสร็จแล้ว" ทันทีผ่านหน้าหลัก
         function toggleHwDone(id) {
             const index = homeworks.findIndex(h => h.id === id);
             if (index !== -1) {
@@ -363,7 +416,14 @@
             }
         }
 
-        // วาดตารางเรียน
+        function deleteHomework(id) {
+            if(confirm("คุณต้องการลบรายการการบ้านนี้ใช่หรือไม่?")) {
+                homeworks = homeworks.filter(h => h.id !== id);
+                localStorage.setItem('homeworksData', JSON.stringify(homeworks));
+                renderHomework();
+            }
+        }
+
         function renderSchedule() {
             const container = document.getElementById('scheduleList');
             const todayClasses = schedules.filter(c => c.day === currentSelectedDay);
@@ -380,6 +440,14 @@
                     ? `<span class="bg-slate-200 text-slate-700 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded mr-1.5">${c.code}</span>` 
                     : '';
 
+                const adminControls = currentUserRole === 'admin' 
+                    ? `
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button onclick="openEditSchedule(${c.id})" title="แก้ไขวิชา" class="text-slate-400 hover:text-indigo-600 text-sm p-1 transition cursor-pointer">✏️</button>
+                        <button onclick="deleteSchedule(${c.id})" title="ลบวิชา" class="text-gray-300 hover:text-red-500 text-xs font-bold p-1 transition cursor-pointer">✕</button>
+                    </div>
+                    ` : '';
+
                 return `
                     <div class="p-3 ${currentDayColor.bg} border-l-4 ${currentDayColor.border} rounded-xl flex justify-between items-center shadow-xs">
                         <div>
@@ -390,16 +458,12 @@
                             <p class="text-xs text-slate-500 font-medium mt-1">ผู้สอน: ${c.teacher}</p>
                             <p class="text-[11px] text-slate-600 font-bold mt-0.5">⏰ ${c.start} - ${c.end} น.</p>
                         </div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <button onclick="openEditSchedule(${c.id})" title="แก้ไขวิชา" class="text-slate-400 hover:text-indigo-600 text-sm p-1 transition cursor-pointer">✏️</button>
-                            <button onclick="deleteSchedule(${c.id})" title="ลบวิชา" class="text-gray-300 hover:text-red-500 text-xs font-bold p-1 transition cursor-pointer">✕</button>
-                        </div>
+                        ${adminControls}
                     </div>
                 `;
             }).join('');
         }
 
-        // 🌟 วาดการบ้าน (เพิ่มการแยกแถบสีสถานะงาน และปุ่มกดแก้ไขการบ้าน)
         function renderHomework() {
             const container = document.getElementById('homeworkList');
             const todayHomeworks = homeworks.filter(h => h.day === currentSelectedDay);
@@ -409,7 +473,6 @@
                 return;
             }
 
-            // ตั้งค่าสีป้ายและสีขอบตามสถานะของงาน
             const statusStyles = {
                 todo:  { border: 'border-l-red-500 bg-red-50/30',  badge: 'bg-red-100 text-red-800',  text: '🔴 ยังไม่เริ่ม' },
                 doing: { border: 'border-l-amber-500 bg-amber-50/30', badge: 'bg-amber-100 text-amber-800', text: '🟡 กำลังทำ' },
@@ -420,11 +483,26 @@
                 const currentStatus = h.status || 'todo';
                 const style = statusStyles[currentStatus];
 
-                const typeBadge = h.type === 'group' 
-                    ? `<span class="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-purple-200">👥 งานกลุ่ม</span>`
-                    : `<span class="bg-teal-100 text-teal-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-teal-200">👤 งานเดี่ยว</span>`;
+                // จัดการแท็กประเภทและรายละเอียดสมาชิกกลุ่ม
+                let typeBadge = '';
+                let groupDetailsHTML = '';
 
-                // ถ้างานเสร็จแล้ว ไม่ต้องโชว์ปุ่มติ๊กถูกสีเขียวซ้ำ
+                if (h.type === 'group') {
+                    const countLabel = h.groupCount ? ` (${h.groupCount} คน)` : '';
+                    typeBadge = `<span class="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-purple-200">👥 งานกลุ่ม${countLabel}</span>`;
+                    
+                    if (h.groupMembers) {
+                        groupDetailsHTML = `
+                            <div class="mt-2 p-2 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                                <span class="text-indigo-600 font-bold block mb-0.5">👤 สมาชิกในกลุ่ม:</span>
+                                <p class="text-gray-600 whitespace-pre-line">${h.groupMembers}</p>
+                            </div>
+                        `;
+                    }
+                } else {
+                    typeBadge = `<span class="bg-teal-100 text-teal-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-teal-200">👤 งานเดี่ยว</span>`;
+                }
+
                 const actionButton = currentStatus !== 'done'
                     ? `<button onclick="toggleHwDone(${h.id})" class="bg-emerald-50 hover:bg-emerald-500 text-emerald-600 hover:text-white border border-emerald-200 hover:border-emerald-500 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">✓ เสร็จแล้ว</button>`
                     : `<span class="text-emerald-600 text-xs font-bold px-2 py-1 bg-emerald-50 rounded-lg shrink-0">🎉 สำเร็จ</span>`;
@@ -444,7 +522,10 @@
                             </div>
 
                             <p class="font-semibold text-gray-800 text-sm mt-2 whitespace-pre-line ${currentStatus === 'done' ? 'line-through text-gray-400' : ''}">${h.title}</p>
-                            <p class="text-xs text-slate-400">กำหนดส่ง: <span class="text-red-500 font-semibold">${h.date}</span></p>
+                            
+                            ${groupDetailsHTML}
+
+                            <p class="text-xs text-slate-400 mt-2">กำหนดส่ง: <span class="text-red-500 font-semibold">${h.date}</span></p>
                         </div>
                         
                         <div class="flex flex-col sm:flex-row items-center gap-2 shrink-0">
@@ -460,7 +541,6 @@
         function updateHomeworkSubjectSelect() {
             const select = document.getElementById('hwSubjectSelect');
             const todayClasses = schedules.filter(c => c.day === currentSelectedDay);
-            
             if(todayClasses.length === 0) {
                 select.innerHTML = `<option value="วิชาทั่วไป|ไม่ระบุชื่อครู">วิชาทั่วไป (ยังไม่ได้เพิ่มวิชาเรียน)</option>`;
             } else {
@@ -468,20 +548,6 @@
                     const displayLabel = c.code ? `[${c.code}] ${c.name}` : c.name;
                     return `<option value="${c.name}|${c.teacher}">${displayLabel} (${c.teacher})</option>`;
                 }).join('');
-            }
-        }
-
-        function deleteSchedule(id) {
-            schedules = schedules.filter(c => c.id !== id);
-            localStorage.setItem('schedulesData', JSON.stringify(schedules));
-            renderSchedule();
-        }
-
-        function deleteHomework(id) {
-            if(confirm("คุณต้องการลบรายการการบ้านนี้ใช่หรือไม่?")) {
-                homeworks = homeworks.filter(h => h.id !== id);
-                localStorage.setItem('homeworksData', JSON.stringify(homeworks));
-                renderHomework();
             }
         }
 
