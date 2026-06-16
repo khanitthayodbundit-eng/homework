@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ตารางเรียนม.2/4">
     
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/khanitthayodbundit-eng/homework/refs/heads/main/icon.png">
+    <link class="ios-icon" rel="apple-touch-icon" href="https://raw.githubusercontent.com/khanitthayodbundit-eng/homework/refs/heads/main/icon.png">
 </head>
 <body class="bg-slate-100 min-h-screen p-4 md:p-6 flex flex-col justify-between">
 
@@ -70,7 +70,7 @@
                 <option value="admin">👑 Admin (จัดการได้ทั้งหมด)</option>
             </select>
         </div>
-        <p class="text-[11px] text-gray-400 font-medium">© 2026 ม.2/4 ห้องประจำ 646 · กดปุ่มแชร์ใน Safari แล้วเลือก "เพิ่มไปยังหน้าจอโฮม"</p>
+        <p class="text-[11px] text-gray-400 font-medium">© 2026 ม.2/4 ห้องประจำ 646 · เปิดผ่าน Safari บน iPhone แล้วกด 'เพิ่มไปยังหน้าจอโฮม'</p>
     </footer>
 
     <div id="scheduleModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -118,8 +118,8 @@
         </div>
     </div>
 
-    <div id="homeworkModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
+    <div id="homeworkModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl my-auto">
             <h3 id="homeworkModalTitle" class="text-xl font-bold text-gray-800 mb-4">เพิ่มการบ้านใหม่</h3>
             <form id="homeworkForm" class="space-y-4">
                 <input type="hidden" id="hwIdInput">
@@ -131,15 +131,38 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทงาน</label>
                     <div class="flex gap-4">
                         <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                            <input type="radio" name="workType" value="single" checked class="w-4 h-4 accent-indigo-600">
+                            <input type="radio" name="workType" value="single" checked onchange="toggleGroupFields(this.value)" class="w-4 h-4 accent-indigo-600">
                             👤 งานเดี่ยว
                         </label>
                         <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                            <input type="radio" name="workType" value="group" class="w-4 h-4 accent-indigo-600">
+                            <input type="radio" name="workType" value="group" onchange="toggleGroupFields(this.value)" class="w-4 h-4 accent-indigo-600">
                             👥 งานกลุ่ม
                         </label>
                     </div>
                 </div>
+
+                <div id="groupFieldsSection" class="hidden space-y-4 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">👥 จำนวนสมาชิกในกลุ่ม</label>
+                        <select id="hwGroupSizeSelect" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none">
+                            <option value="2">กลุ่ม 2 คน</option>
+                            <option value="3">กลุ่ม 3 คน</option>
+                            <option value="4">กลุ่ม 4 คน</option>
+                            <option value="5">กลุ่ม 5 คน</option>
+                            <option value="6">กลุ่ม 6 คน</option>
+                            <option value="7">กลุ่ม 7 คน</option>
+                            <option value="8">กลุ่ม 8 คน</option>
+                            <option value="9">กลุ่ม 9 คน</option>
+                            <option value="10">กลุ่ม 10 คน</option>
+                            <option value="ทั้งห้อง">กลุ่มใหญ่ (ทั้งห้องเรียน)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">✍️ ชื่อสมาชิก / เลขที่ หรือ กลุ่มที่</label>
+                        <textarea id="hwGroupMembersInput" placeholder="เช่น นาย A, นาย B, นาย C หรือ ระบุกลุ่มที่ 1" rows="2" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none"></textarea>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">สถานะปัจจุบัน</label>
                     <select id="hwStatusSelect" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none">
@@ -150,7 +173,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียดงาน</label>
-                    <textarea id="hwTitleInput" required placeholder="สั่งให้ทำอะไร..." rows="3" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none"></textarea>
+                    <textarea id="hwTitleInput" required placeholder="สั่งให้ทำอะไร..." rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none"></textarea>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">กำหนดส่ง</label>
@@ -207,7 +230,7 @@
             { id: 36, day: "Friday", code: "ประชุม", name: "ประชุมคณะสี", teacher: "ไม่ระบุชื่อครู", start: "15:00", end: "15:50" }
         ];
 
-        const SYSTEM_VERSION = "v1.9-pwa-icon";
+        const SYSTEM_VERSION = "v2.1-final-icon";
         if (localStorage.getItem('sys_version') !== SYSTEM_VERSION) {
             localStorage.setItem('schedulesData', JSON.stringify(defaultSchedules));
             localStorage.setItem('sys_version', SYSTEM_VERSION);
@@ -223,6 +246,15 @@
             Thursday:  { active: 'bg-orange-500 text-white border-orange-600 scale-105', border: 'border-l-orange-500', bg: 'bg-orange-50/50' },
             Friday:    { active: 'bg-sky-500 text-white border-sky-600 scale-105', border: 'border-l-sky-500', bg: 'bg-sky-50/50' }
         };
+
+        function toggleGroupFields(value) {
+            const section = document.getElementById('groupFieldsSection');
+            if (value === 'group') {
+                section.classList.remove('hidden');
+            } else {
+                section.classList.add('hidden');
+            }
+        }
 
         function changeUserRole(role) {
             currentUserRole = role;
@@ -249,6 +281,7 @@
             document.getElementById('homeworkModalTitle').innerText = 'เพิ่มการบ้านใหม่';
             document.getElementById('homeworkSubmitBtn').innerText = 'บันทึกงาน';
             document.querySelector('input[name="workType"][value="single"]').checked = true;
+            toggleGroupFields('single');
             document.getElementById('hwStatusSelect').value = 'todo'; 
             document.getElementById('hwDateInput').value = new Date().toISOString().split('T')[0];
             updateHomeworkSubjectSelect();
@@ -317,6 +350,7 @@
             const hwId = document.getElementById('hwIdInput').value;
             const selectedType = document.querySelector('input[name="workType"]:checked').value;
             const [subjectName, teacherName] = document.getElementById('hwSubjectSelect').value.split('|');
+            
             const hwData = {
                 day: currentSelectedDay,
                 subject: subjectName,
@@ -324,8 +358,11 @@
                 type: selectedType,
                 status: document.getElementById('hwStatusSelect').value, 
                 title: document.getElementById('hwTitleInput').value.trim(),
-                date: document.getElementById('hwDateInput').value
+                date: document.getElementById('hwDateInput').value,
+                groupSize: selectedType === 'group' ? document.getElementById('hwGroupSizeSelect').value : '',
+                groupMembers: selectedType === 'group' ? document.getElementById('hwGroupMembersInput').value.trim() : ''
             };
+
             if (hwId) {
                 const index = homeworks.findIndex(h => h.id === parseInt(hwId));
                 if (index !== -1) homeworks[index] = { ...homeworks[index], ...hwData };
@@ -344,7 +381,15 @@
             updateHomeworkSubjectSelect();
             document.getElementById('hwIdInput').value = hw.id;
             document.getElementById('hwSubjectSelect').value = `${hw.subject}|${hw.teacher}`;
+            
             document.querySelector(`input[name="workType"][value="${hw.type}"]`).checked = true;
+            toggleGroupFields(hw.type);
+            
+            if (hw.type === 'group') {
+                document.getElementById('hwGroupSizeSelect').value = hw.groupSize || '2';
+                document.getElementById('hwGroupMembersInput').value = hw.groupMembers || '';
+            }
+
             document.getElementById('hwStatusSelect').value = hw.status || 'todo';
             document.getElementById('hwTitleInput').value = hw.title;
             document.getElementById('hwDateInput').value = hw.date;
@@ -407,7 +452,26 @@
             container.innerHTML = todayHomeworks.map(h => {
                 const currentStatus = h.status || 'todo';
                 const style = statusStyles[currentStatus];
-                const typeBadge = h.type === 'group' ? `<span class="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-purple-200">👥 กลุ่ม</span>` : `<span class="bg-teal-100 text-teal-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-teal-200">👤 เดี่ยว</span>`;
+                
+                let typeBadge = '';
+                let groupDetailsHTML = '';
+                
+                if (h.type === 'group') {
+                    const sizeLabel = h.groupSize === 'ทั้งห้อง' ? 'ทั้งห้อง' : `${h.groupSize} คน`;
+                    typeBadge = `<span class="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-purple-200">👥 กลุ่ม (${sizeLabel})</span>`;
+                    
+                    if (h.groupMembers) {
+                        groupDetailsHTML = `
+                            <div class="bg-purple-50/50 border border-purple-100 p-2 rounded-xl text-xs mt-1.5">
+                                <span class="font-bold text-purple-800">สมาชิก:</span> 
+                                <span class="text-slate-600 font-medium">${h.groupMembers}</span>
+                            </div>
+                        `;
+                    }
+                } else {
+                    typeBadge = `<span class="bg-teal-100 text-teal-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-teal-200">👤 เดี่ยว</span>`;
+                }
+
                 let actionButton = currentStatus === 'done' ? `<span class="text-emerald-600 text-xs font-bold px-2 py-1 bg-emerald-50 rounded-lg shrink-0">🎉 สำเร็จ</span>` : `<button onclick="toggleHwDone(${h.id})" class="bg-emerald-50 hover:bg-emerald-500 text-emerald-600 hover:text-white border border-emerald-200 px-2.5 py-1.5 rounded-xl text-xs font-bold transition shrink-0">✓ เสร็จ</button>`;
 
                 return `
@@ -420,7 +484,8 @@
                             </div>
                             <p class="text-xs text-slate-500 font-medium">ครูผู้สั่ง: <span class="text-indigo-600">${h.teacher}</span></p>
                             <p class="font-semibold text-gray-800 text-sm mt-1 whitespace-pre-line ${currentStatus === 'done' ? 'line-through text-gray-400' : ''}">${h.title}</p>
-                            <p class="text-xs text-slate-400">กำหนดส่ง: <span class="text-red-500 font-semibold">${h.date}</span></p>
+                            ${groupDetailsHTML}
+                            <p class="text-xs text-slate-400 mt-1">กำหนดส่ง: <span class="text-red-500 font-semibold">${h.date}</span></p>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
                             <button onclick="openEditHomework(${h.id})" class="text-slate-400 text-xs p-2 bg-slate-50 border border-slate-200 rounded-xl">✏️</button>
