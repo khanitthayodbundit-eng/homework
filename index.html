@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แอปตารางเรียนและการบ้าน ม.2/4</title>
+    <title>แอปตารางเรียนและการบ้าน ม.2/4 (เวอร์ชัน Default วันตามจริง)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 md:p-6 pb-24">
+<body class="bg-slate-100 min-h-screen p-4 md:p-6 flex flex-col justify-between">
 
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-4xl mx-auto w-full mb-6">
         
         <header class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-slate-800">📅 Class & Homework Tracker</h1>
-                <p class="text-sm text-gray-500">ตารางเรียน ชั้น ม. 2/4 ห้องประจำ 646</p>
+                <p class="text-sm text-gray-500">ตารางเรียน ชั้น ม. 2/4 ห้องประจำ 646 (เลือกวันเริ่มต้นตามวันจริงโดยอัตโนมัติ)</p>
             </div>
             <div class="flex gap-2">
-                <button id="openScheduleBtn" class="hidden bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 rounded-xl shadow-md transition cursor-pointer text-sm">
-                    + เพิ่มวิชาเรียน (Admin)
+                <button id="openScheduleBtn" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 rounded-xl shadow-md transition cursor-pointer text-sm hidden">
+                    + เพิ่มวิชาเรียน
                 </button>
                 <button id="openHomeworkBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-xl shadow-md transition cursor-pointer text-sm">
                     + เพิ่มการบ้าน
@@ -58,13 +58,16 @@
         </main>
     </div>
 
-    <div class="fixed bottom-4 right-4 bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-2 z-40">
-        <span class="text-xs font-bold text-gray-500 pl-2">สิทธิ์ผู้ใช้:</span>
-        <select id="roleSelector" onchange="changeRole(this.value)" class="text-xs font-bold px-2 py-1.5 rounded-xl border border-slate-200 focus:outline-none cursor-pointer bg-slate-50 text-gray-700">
-            <option value="user">👤 คนทั่วไป (User)</option>
-            <option value="admin">🔑 ผู้ดูแลระบบ (Admin)</option>
-        </select>
-    </div>
+    <footer class="w-full text-center py-6 border-t border-slate-200 flex flex-col items-center justify-center gap-3">
+        <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-xs border border-slate-200">
+            <label for="userRoleSelect" class="text-xs font-bold text-slate-600">🔐 ระดับสิทธิ์ผู้ใช้งานปัจจุบัน:</label>
+            <select id="userRoleSelect" onchange="changeUserRole(this.value)" class="text-xs font-bold text-indigo-600 focus:outline-none cursor-pointer bg-slate-50 px-2 py-1 rounded-lg border border-slate-200">
+                <option value="student">👤 ผู้ใช้ทั่วไป (จัดการเฉพาะการบ้านได้)</option>
+                <option value="admin">👑 ผู้ดูแลระบบ / Admin (แก้ไขได้ทั้งหมด)</option>
+            </select>
+        </div>
+        <p class="text-[11px] text-gray-400 font-medium">© 2026 ตารางเรียนและการบ้าน ม.2/4 ห้องประจำ 646 · ข้อมูลระบบอ้างอิงตามวันเวลาปัจจุบันอัตโนมัติ</p>
+    </footer>
 
     <div id="scheduleModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
@@ -112,10 +115,11 @@
     </div>
 
     <div id="homeworkModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl overflow-y-auto max-h-[90vh]">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
             <h3 id="homeworkModalTitle" class="text-xl font-bold text-gray-800 mb-4">เพิ่มการบ้านใหม่</h3>
             <form id="homeworkForm" class="space-y-4">
                 <input type="hidden" id="hwIdInput">
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">วิชาที่สั่งงาน (ครูผู้สอน)</label>
                     <select id="hwSubjectSelect" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none"></select>
@@ -124,25 +128,13 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">ประเภทงาน</label>
                     <div class="flex gap-4">
                         <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                            <input type="radio" name="workType" value="single" checked onchange="toggleGroupFields(this.value)" class="w-4 h-4 accent-indigo-600">
+                            <input type="radio" name="workType" value="single" checked class="w-4 h-4 accent-indigo-600">
                             👤 งานเดี่ยว
                         </label>
                         <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                            <input type="radio" name="workType" value="group" onchange="toggleGroupFields(this.value)" class="w-4 h-4 accent-indigo-600">
+                            <input type="radio" name="workType" value="group" class="w-4 h-4 accent-indigo-600">
                             👥 งานกลุ่ม
                         </label>
-                    </div>
-                </div>
-
-                <div id="groupFieldsSection" class="hidden p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
-                    <p class="text-xs font-bold text-indigo-600">👥 ข้อมูลรายละเอียดสมาชิกกลุ่ม</p>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">จำนวนสมาชิกในกลุ่ม (คน)</label>
-                        <input type="number" id="groupCountInput" min="1" placeholder="เช่น 5" class="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-xl focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-600 mb-1">รายชื่อสมาชิก / เลขที่</label>
-                        <textarea id="groupMembersInput" placeholder="เช่น นายเอ (เลขที่ 1), นายบี (เลขที่ 2)" rows="2" class="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-xl focus:outline-none"></textarea>
                     </div>
                 </div>
 
@@ -154,6 +146,7 @@
                         <option value="done">🟢 เสร็จเรียบร้อยแล้ว</option>
                     </select>
                 </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียดงาน</label>
                     <textarea id="hwTitleInput" required placeholder="สั่งให้ทำอะไร..." rows="3" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none"></textarea>
@@ -171,55 +164,54 @@
     </div>
 
     <script>
-        // 📅 ระบบตรวจสอบวันปัจจุบันจริงอัตโนมัติ (เปิดวันเสาร์-อาทิตย์ จะปัดไปวันจันทร์)
-        const daysOfWeek = ['Monday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Monday'];
-        const todayIndex = new Date().getDay();
-
-        let currentSelectedDay = daysOfWeek[todayIndex];
-        let currentUserRole = 'user'; 
+        let currentSelectedDay = 'Monday';
+        let currentUserRole = localStorage.getItem('userRole') || 'student';
 
         const defaultSchedules = [
             { id: 1, day: "Monday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "08:20", end: "09:10" },
-            { id: 2, day: "Monday", code: "อ22209", name: "ภาษาอังกฤษ", teacher: "ครูNathan", start: "09:10", end: "10:00" },
+            { id: 2, day: "Monday", code: "อ22209", name: "ภาษาอังกฤษ", teacher: "ครู Nathan", start: "09:10", end: "10:00" },
             { id: 3, day: "Monday", code: "ว22101", name: "วิทยาศาสตร์", teacher: "ครูรัตนกร", start: "10:00", end: "10:50" },
-            { id: 4, day: "Monday", code: "ว22222", name: "วิทยาศาสตร์เพิ่มเติม", teacher: "ครูณัฐวุฒิ", start: "11:40", end: "12:30" },
-            { id: 5, day: "Monday", code: "ว22222", name: "วิทยาศาสตร์เพิ่มเติม", teacher: "ครูณัฐวุฒิ", start: "12:30", end: "13:20" },
-            { id: 6, day: "Monday", code: "ค22213", name: "คณิตศาสตร์เพิ่มเติม", teacher: "ครูอุทุมพร", start: "13:20", end: "14:10" },
-            { id: 7, day: "Monday", code: "I20201", name: "IS1", teacher: "ครูอุทุมพร", start: "14:10", end: "15:00" },
-            { id: 8, day: "Monday", code: "พ22103", name: "พลศึกษา", teacher: "ครูอดิศร", start: "15:00", end: "15:50" },
-            { id: 9,  day: "Tuesday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "08:20", end: "09:10" },
-            { id: 10, day: "Tuesday", code: "ง22101", name: "การงานอาชีพ", teacher: "ครูสุพิชชา", start: "09:10", end: "10:00" },
-            { id: 11, day: "Tuesday", code: "ง22101", name: "การงานอาชีพ", teacher: "ครูสุพิชชา", start: "10:00", end: "10:50" },
-            { id: 12, day: "Tuesday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "11:40", end: "12:30" },
-            { id: 13, day: "Tuesday", code: "ศ22101", name: "ศิลปะ/ดนตรี", teacher: "ครูสมฤกษ์", start: "12:30", end: "13:20" },
-            { id: 14, day: "Tuesday", code: "สาธารณะฯ", name: "กิจกรรมสาธารณประโยชน์", teacher: "คุณธรรม", start: "13:20", end: "14:10" },
-            { id: 15, day: "Tuesday", code: "ลส./นน.", name: "ลูกเสือ/เนตรนารี", teacher: "ยุวกาชาด", start: "14:10", end: "15:00" },
-            { id: 16, day: "Tuesday", code: "ก22905", name: "แนะแนว", teacher: "ครูธีราพร", start: "15:00", end: "15:50" },
-            { id: 17, day: "Wednesday", code: "ENG SCI", name: "English Science", teacher: "ครูStephani", start: "08:20", end: "09:10" },
-            { id: 18, day: "Wednesday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "09:10", end: "10:00" },
-            { id: 19, day: "Wednesday", code: "ค22213", name: "คณิตศาสตร์เพิ่มเติม", teacher: "ครูอุทุมพร", start: "10:00", end: "10:50" },
-            { id: 20, day: "Wednesday", code: "อ22101", name: "ภาษาอังกฤษพื้นฐาน", teacher: "ครูดวงเดอ", start: "11:40", end: "12:30" },
-            { id: 21, day: "Wednesday", code: "พ22101", name: "สุขศึกษา", teacher: "ครูอภัสรา", start: "12:30", end: "13:20" },
-            { id: 22, day: "Wednesday", code: "ค22101", name: "คณิตศาสตร์พื้นฐาน", teacher: "ครูภัสรดา", start: "13:20", end: "14:10" },
-            { id: 23, day: "Wednesday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "14:10", end: "15:00" },
-            { id: 24, day: "Wednesday", code: "ENG CON", name: "English Conversation", teacher: "ครูNathan", start: "15:00", end: "15:50" },
-            { id: 25, day: "Thursday", code: "ว22101", name: "วิทยาศาสตร์พื้นฐาน", teacher: "ครูรัตนกร", start: "08:20", end: "09:10" },
-            { id: 26, day: "Thursday", code: "ว22101", name: "วิทยาศาสตร์พื้นฐาน", teacher: "ครูรัตนกร", start: "09:10", end: "10:00" },
-            { id: 27, day: "Thursday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "10:00", end: "10:50" },
-            { id: 28, day: "Thursday", code: "ค22101", name: "คณิตศาสตร์พื้นฐาน", teacher: "ครูภัสรดา", start: "11:40", end: "12:30" },
-            { id: 29, day: "Thursday", code: "อ22101", name: "ภาษาอังกฤษพื้นฐาน", teacher: "ครูดวงเดอ", start: "12:30", end: "13:20" },
-            { id: 30, day: "Thursday", code: "ค22213", name: "คณิตศาสตร์เพิ่มเติม", teacher: "ครูอุทุมพร", start: "13:20", font: "14:10" },
-            { id: 31, day: "Thursday", code: "ส22103", name: "ประวัติศาสตร์", teacher: "ครูนิรุช", start: "14:10", end: "15:00" },
-            { id: 32, day: "Thursday", code: "I20201", name: "IS1", teacher: "ครูอุทุมพร", start: "15:00", end: "15:50" },
-            { id: 33, day: "Friday", code: "ว22227", name: "วิทยาการคำนวณ", teacher: "ครูจีระศักดิ์", start: "08:20", end: "09:10" },
-            { id: 34, day: "Friday", code: "ว22227", name: "วิทยาการคำนวณ", teacher: "ครูจีระศักดิ์", start: "09:10", end: "10:00" },
-            { id: 35, day: "Friday", code: "ศ22101", name: "ศิลปะ/นาฏศิลป์", teacher: "ครูวีณา", start: "10:00", end: "10:50" },
-            { id: 36, day: "Friday", code: "ค22101", name: "คณิตศาสตร์พื้นฐาน", teacher: "ครูภัสรดา", start: "11:40", end: "12:30" },
-            { id: 37, day: "Friday", code: "อ22101", name: "ภาษาอังกฤษพื้นฐาน", teacher: "ครูดวงเดอ", start: "12:30", end: "13:20" },
-            { id: 38, day: "Friday", code: "PISA", name: "เตรียมความพร้อม PISA", teacher: "ครูผู้สอน", start: "13:20", end: "14:10" },
-            { id: 39, day: "Friday", code: "ชุมนุม", name: "กิจกรรมชุมนุม", teacher: "ครูผู้สอน", start: "14:10", end: "15:00" },
-            { id: 40, day: "Friday", code: "ประชุม", name: "ประชุมคณะสี", teacher: "คุณครู", start: "15:00", end: "15:50" }
+            { id: 4, day: "Monday", code: "ว22222", name: "หุ่นยนต์บังคับมือ", teacher: "ครูณัฐวุฒิ", start: "11:40", end: "13:20" },
+            { id: 5, day: "Monday", code: "ค22213", name: "คณิตศาสตร์", teacher: "ครูอุทุมพร", start: "13:20", end: "14:10" },
+            { id: 6, day: "Monday", code: "I20201", name: "IS1", teacher: "ครูกาญจนา", start: "14:10", end: "15:00" },
+            { id: 7, day: "Monday", code: "พ22103", name: "พลศึกษา", teacher: "ครูอดิศร", start: "15:00", end: "15:50" },
+            { id: 8, day: "Tuesday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "08:20", end: "09:10" },
+            { id: 9, day: "Tuesday", code: "ง22101", name: "การงานอาชีพ", teacher: "ครูสุพิชชา", start: "09:10", end: "10:50" },
+            { id: 10, day: "Tuesday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "11:40", end: "12:30" },
+            { id: 11, day: "Tuesday", code: "ศ22101", name: "ศิลปะ/ดนตรี", teacher: "ครูสมฤกษ์", start: "12:30", end: "13:20" },
+            { id: 12, day: "Tuesday", code: "สาธารณะฯ", name: "กิจกรรมสาธารณประโยชน์", teacher: "ไม่ระบุชื่อครู", start: "13:20", end: "14:10" },
+            { id: 13, day: "Tuesday", code: "ลส./นน.", name: "ลูกเสือ/เนตรนารี", teacher: "ไม่ระบุชื่อครู", start: "14:10", end: "15:00" },
+            { id: 14, day: "Tuesday", code: "ก22905", name: "แนะแนว", teacher: "ครูธีราพร", start: "15:00", end: "15:50" },
+            { id: 15, day: "Wednesday", code: "ENG SCI", name: "English Science", teacher: "ครู Stephani", start: "08:20", end: "09:10" },
+            { id: 16, day: "Wednesday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "09:10", end: "10:00" },
+            { id: 17, day: "Wednesday", code: "ค22213", name: "คณิตศาสตร์", teacher: "ครูอุทุมพร", start: "10:00", end: "10:50" },
+            { id: 18, day: "Wednesday", code: "อ22101", name: "ภาษาอังกฤษพื้นฐาน", teacher: "ครูดวงเดือน", start: "11:40", end: "12:30" },
+            { id: 19, day: "Wednesday", code: "พ22101", name: "สุขศึกษา", teacher: "ครูอภัสรา", start: "12:30", end: "13:20" },
+            { id: 20, day: "Wednesday", code: "ค22101", name: "Math Comp", teacher: "ครูลภัสรดา", start: "13:20", end: "14:10" },
+            { id: 21, day: "Wednesday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "14:10", end: "15:00" },
+            { id: 22, day: "Wednesday", code: "ENG CON", name: "English Conversation", teacher: "ครู Nathan", start: "15:00", end: "15:50" },
+            { id: 23, day: "Thursday", code: "ว22101", name: "วิทยาศาสตร์", teacher: "ครูรัตนกร", start: "08:20", end: "10:00" },
+            { id: 24, day: "Thursday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "10:00", end: "10:50" },
+            { id: 25, day: "Thursday", code: "ค22101", name: "Math Comp", teacher: "ครูลภัสรดา", start: "11:40", end: "12:30" },
+            { id: 26, day: "Thursday", code: "อ22101", name: "ภาษาอังกฤษพื้นฐาน", teacher: "ครูดวงเดือน", start: "12:30", end: "13:20" },
+            { id: 27, day: "Thursday", code: "ค22213", name: "คณิตศาสตร์", teacher: "ครูอุทุมพร", start: "13:20", end: "14:10" },
+            { id: 28, day: "Thursday", code: "ส22103", name: "ประวัติศาสตร์", teacher: "ครูนิรุช", start: "14:10", end: "15:00" },
+            { id: 29, day: "Thursday", code: "I20201", name: "IS1", teacher: "ครูกาญจนา", start: "15:00", end: "15:50" },
+            { id: 30, day: "Friday", code: "ว22227", name: "วิทยาการคำนวณ Comp", teacher: "ครูจีระศักดิ์", start: "08:20", end: "10:00" },
+            { id: 31, day: "Friday", code: "ศ22101", name: "ศิลปะ/นาฏศิลป์", teacher: "ครูวีณา", start: "10:00", end: "10:50" },
+            { id: 32, day: "Friday", code: "ค22101", name: "คณิตศาสตร์", teacher: "ครูภัสรดา", start: "11:40", end: "12:30" },
+            { id: 33, day: "Friday", code: "อ22101", name: "ภาษาอังกฤษพื้นฐาน", teacher: "ครูดวงเดือน", start: "12:30", end: "13:20" },
+            { id: 34, day: "Friday", code: "PISA", name: "เตรียมความพร้อม PISA", teacher: "ครูผู้สอน", start: "13:20", end: "14:10" },
+            { id: 35, day: "Friday", code: "ชุมนุม", name: "กิจกรรมชุมนุม", teacher: "ไม่ระบุชื่อครู", start: "14:10", end: "15:00" },
+            { id: 36, day: "Friday", code: "ประชุม", name: "ประชุมคณะสี", teacher: "ไม่ระบุชื่อครู", start: "15:00", end: "15:50" }
         ];
+
+        // 🔄 อัปเดตโครงสร้างระบบเป็น v1.7 เพื่อเคลียร์ cache ล้างค่าตารางเก่า
+        const SYSTEM_VERSION = "v1.7";
+        if (localStorage.getItem('sys_version') !== SYSTEM_VERSION) {
+            localStorage.setItem('schedulesData', JSON.stringify(defaultSchedules));
+            localStorage.setItem('sys_version', SYSTEM_VERSION);
+        }
 
         if (!localStorage.getItem('schedulesData') || JSON.parse(localStorage.getItem('schedulesData')).length === 0) {
             localStorage.setItem('schedulesData', JSON.stringify(defaultSchedules));
@@ -236,36 +228,27 @@
             Friday:    { active: 'bg-sky-500 text-white border-sky-600 scale-105', border: 'border-l-sky-500', bg: 'bg-sky-50/50' }
         };
 
-        function toggleGroupFields(type) {
-            const section = document.getElementById('groupFieldsSection');
-            if (type === 'group') {
-                section.classList.remove('hidden');
-            } else {
-                section.classList.add('hidden');
-                document.getElementById('groupCountInput').value = '';
-                document.getElementById('groupMembersInput').value = '';
-            }
-        }
-
-        function changeRole(role) {
+        // ฟังก์ชันจัดการเปลี่ยนสิทธิ์
+        function changeUserRole(role) {
             currentUserRole = role;
+            localStorage.setItem('userRole', role);
+            
             const openScheduleBtn = document.getElementById('openScheduleBtn');
             if (role === 'admin') {
                 openScheduleBtn.classList.remove('hidden');
             } else {
                 openScheduleBtn.classList.add('hidden');
             }
+            
             renderSchedule();
             renderHomework();
         }
-
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         document.getElementById('openScheduleBtn').addEventListener('click', () => {
             document.getElementById('scheduleForm').reset();
             document.getElementById('classIdInput').value = '';
             document.getElementById('scheduleModalTitle').innerText = 'เพิ่มวิชาในตารางเรียน';
+            document.getElementById('scheduleSubmitBtn').innerText = 'บันทึกวิชา';
             document.getElementById('classDayInput').value = currentSelectedDay;
             openModal('scheduleModal');
         });
@@ -276,11 +259,17 @@
             document.getElementById('homeworkModalTitle').innerText = 'เพิ่มการบ้านใหม่';
             document.getElementById('homeworkSubmitBtn').innerText = 'บันทึกงาน';
             document.querySelector('input[name="workType"][value="single"]').checked = true;
-            toggleGroupFields('single');
             document.getElementById('hwStatusSelect').value = 'todo'; 
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('hwDateInput').value = today;
+
             updateHomeworkSubjectSelect();
             openModal('homeworkModal');
         });
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function selectDay(day) {
             currentSelectedDay = day;
@@ -296,8 +285,11 @@
             renderHomework();
         }
 
+        // บันทึก/แก้ไข วิชาเรียน
         document.getElementById('scheduleForm').addEventListener('submit', (e) => {
             e.preventDefault();
+            if (currentUserRole !== 'admin') return alert('สิทธิ์ของคุณไม่สามารถแก้ไขตารางเรียนได้');
+            
             const idValue = document.getElementById('classIdInput').value;
             const inputDay = document.getElementById('classDayInput').value;
 
@@ -319,11 +311,13 @@
             }
 
             localStorage.setItem('schedulesData', JSON.stringify(schedules));
+            document.getElementById('scheduleForm').reset();
             closeModal('scheduleModal');
             selectDay(inputDay);
         });
 
         function openEditSchedule(id) {
+            if (currentUserRole !== 'admin') return;
             const currentClass = schedules.find(c => c.id === id);
             if (!currentClass) return;
 
@@ -336,18 +330,11 @@
             document.getElementById('endTimeInput').value = currentClass.end;
 
             document.getElementById('scheduleModalTitle').innerText = '✏️ แก้ไขข้อมูลวิชาเรียน';
+            document.getElementById('scheduleSubmitBtn').innerText = 'บันทึกการแก้ไข';
             openModal('scheduleModal');
         }
 
-        function deleteSchedule(id) {
-            if (currentUserRole !== 'admin') return;
-            if (confirm("คุณต้องการลบวิชานี้ออกจากตารางเรียนใช่หรือไม่?")) {
-                schedules = schedules.filter(c => c.id !== id);
-                localStorage.setItem('schedulesData', JSON.stringify(schedules));
-                renderSchedule();
-            }
-        }
-
+        // บันทึก/แก้ไข การบ้าน
         document.getElementById('homeworkForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const hwId = document.getElementById('hwIdInput').value;
@@ -362,9 +349,7 @@
                 type: selectedType,
                 status: document.getElementById('hwStatusSelect').value, 
                 title: document.getElementById('hwTitleInput').value.trim(),
-                date: document.getElementById('hwDateInput').value,
-                groupCount: selectedType === 'group' ? document.getElementById('groupCountInput').value : '',
-                groupMembers: selectedType === 'group' ? document.getElementById('groupMembersInput').value.trim() : ''
+                date: document.getElementById('hwDateInput').value
             };
 
             if (hwId) {
@@ -376,6 +361,7 @@
             }
 
             localStorage.setItem('homeworksData', JSON.stringify(homeworks));
+            document.getElementById('homeworkForm').reset();
             closeModal('homeworkModal');
             renderHomework();
         });
@@ -389,18 +375,13 @@
             document.getElementById('hwIdInput').value = hw.id;
             document.getElementById('hwSubjectSelect').value = `${hw.subject}|${hw.teacher}`;
             document.querySelector(`input[name="workType"][value="${hw.type}"]`).checked = true;
-            
-            toggleGroupFields(hw.type);
-            if(hw.type === 'group') {
-                document.getElementById('groupCountInput').value = hw.groupCount || '';
-                document.getElementById('groupMembersInput').value = hw.groupMembers || '';
-            }
-
             document.getElementById('hwStatusSelect').value = hw.status || 'todo';
             document.getElementById('hwTitleInput').value = hw.title;
             document.getElementById('hwDateInput').value = hw.date;
 
             document.getElementById('homeworkModalTitle').innerText = '✏️ แก้ไขข้อมูลการบ้าน';
+            document.getElementById('homeworkSubmitBtn').innerText = 'บันทึกการแก้ไข';
+
             openModal('homeworkModal');
         }
 
@@ -413,18 +394,7 @@
             }
         }
 
-        function deleteHomework(id) {
-            if (currentUserRole !== 'admin') {
-                alert("สิทธิ์ของคุณเป็นผู้ชมทั่วไป ไม่สามารถลบรายการได้");
-                return;
-            }
-            if(confirm("คุณต้องการลบรายการการบ้านนี้ใช่หรือไม่?")) {
-                homeworks = homeworks.filter(h => h.id !== id);
-                localStorage.setItem('homeworksData', JSON.stringify(homeworks));
-                renderHomework();
-            }
-        }
-
+        // วาดรายการตารางเรียน
         function renderSchedule() {
             const container = document.getElementById('scheduleList');
             const todayClasses = schedules.filter(c => c.day === currentSelectedDay);
@@ -465,6 +435,7 @@
             }).join('');
         }
 
+        // วาดรายการการบ้าน
         function renderHomework() {
             const container = document.getElementById('homeworkList');
             const todayHomeworks = homeworks.filter(h => h.day === currentSelectedDay);
@@ -484,34 +455,16 @@
                 const currentStatus = h.status || 'todo';
                 const style = statusStyles[currentStatus];
 
-                let typeBadge = '';
-                let groupDetailsHTML = '';
+                const typeBadge = h.type === 'group' 
+                    ? `<span class="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-purple-200">👥 งานกลุ่ม</span>`
+                    : `<span class="bg-teal-100 text-teal-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-teal-200">👤 งานเดี่ยว</span>`;
 
-                if (h.type === 'group') {
-                    const countLabel = h.groupCount ? ` (${h.groupCount} คน)` : '';
-                    typeBadge = `<span class="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-purple-200">👥 งานกลุ่ม${countLabel}</span>`;
-                    
-                    if (h.groupMembers) {
-                        groupDetailsHTML = `
-                            <div class="mt-2 p-2 bg-slate-50 rounded-xl border border-slate-100 text-xs">
-                                <span class="text-indigo-600 font-bold block mb-0.5">👤 สมาชิกในกลุ่ม:</span>
-                                <p class="text-gray-600 whitespace-pre-line">${h.groupMembers}</p>
-                            </div>
-                        `;
-                    }
+                let actionButton = '';
+                if (currentStatus === 'done') {
+                    actionButton = `<span class="text-emerald-600 text-xs font-bold px-2 py-1 bg-emerald-50 rounded-lg shrink-0">🎉 สำเร็จ</span>`;
                 } else {
-                    typeBadge = `<span class="bg-teal-100 text-teal-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-teal-200">👤 งานเดี่ยว</span>`;
+                    actionButton = `<button onclick="toggleHwDone(${h.id})" class="bg-emerald-50 hover:bg-emerald-500 text-emerald-600 hover:text-white border border-emerald-200 hover:border-emerald-500 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">✓ เสร็จแล้ว</button>`;
                 }
-
-                const actionButton = currentStatus !== 'done'
-                    ? `<button onclick="toggleHwDone(${h.id})" class="bg-emerald-50 hover:bg-emerald-500 text-emerald-600 hover:text-white border border-emerald-200 hover:border-emerald-500 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer shrink-0">✓ เสร็จแล้ว</button>`
-                    : `<span class="text-emerald-600 text-xs font-bold px-2 py-1 bg-emerald-50 rounded-lg shrink-0">🎉 สำเร็จ</span>`;
-
-                const adminHomeworkControls = currentUserRole === 'admin' 
-                    ? `
-                    <button onclick="openEditHomework(${h.id})" title="แก้ไขการบ้าน" class="text-slate-400 hover:text-indigo-600 text-sm p-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 rounded-xl transition cursor-pointer">✏️</button>
-                    <button onclick="deleteHomework(${h.id})" title="ลบการบ้าน" class="text-slate-400 hover:text-red-500 text-xs p-1.5 bg-slate-50 hover:bg-red-50 border border-slate-200 rounded-xl transition cursor-pointer">✕</button>
-                    ` : '';
 
                 return `
                     <div class="p-4 bg-white border border-slate-100 border-l-4 ${style.border} rounded-xl shadow-xs flex justify-between items-start gap-4">
@@ -528,14 +481,12 @@
                             </div>
 
                             <p class="font-semibold text-gray-800 text-sm mt-2 whitespace-pre-line ${currentStatus === 'done' ? 'line-through text-gray-400' : ''}">${h.title}</p>
-                            
-                            ${groupDetailsHTML}
-
-                            <p class="text-xs text-slate-400 mt-2">กำหนดส่ง: <span class="text-red-500 font-semibold">${h.date}</span></p>
+                            <p class="text-xs text-slate-400">กำหนดส่ง: <span class="text-red-500 font-semibold">${h.date}</span></p>
                         </div>
                         
                         <div class="flex flex-col sm:flex-row items-center gap-2 shrink-0">
-                            ${adminHomeworkControls}
+                            <button onclick="openEditHomework(${h.id})" title="แก้ไขการบ้าน" class="text-slate-400 hover:text-indigo-600 text-sm p-1.5 bg-slate-50 hover:bg-indigo-50 border border-slate-200 rounded-xl transition cursor-pointer">✏️</button>
+                            <button onclick="deleteHomework(${h.id})" title="ลบการบ้าน" class="text-slate-400 hover:text-red-500 text-xs p-1.5 bg-slate-50 hover:bg-red-50 border border-slate-200 rounded-xl transition cursor-pointer">✕</button>
                             ${actionButton}
                         </div>
                     </div>
@@ -546,6 +497,7 @@
         function updateHomeworkSubjectSelect() {
             const select = document.getElementById('hwSubjectSelect');
             const todayClasses = schedules.filter(c => c.day === currentSelectedDay);
+            
             if(todayClasses.length === 0) {
                 select.innerHTML = `<option value="วิชาทั่วไป|ไม่ระบุชื่อครู">วิชาทั่วไป (ยังไม่ได้เพิ่มวิชาเรียน)</option>`;
             } else {
@@ -556,8 +508,50 @@
             }
         }
 
-        // เริ่มต้นฟังก์ชันตามวันจริง
-        selectDay(currentSelectedDay);
+        function deleteSchedule(id) {
+            if (currentUserRole !== 'admin') return alert('สิทธิ์ของคุณไม่สามารถลบตารางเรียนได้');
+            schedules = schedules.filter(c => c.id !== id);
+            localStorage.setItem('schedulesData', JSON.stringify(schedules));
+            renderSchedule();
+        }
+
+        function deleteHomework(id) {
+            if(confirm("คุณต้องการลบรายการการบ้านนี้ใช่หรือไม่?")) {
+                homeworks = homeworks.filter(h => h.id !== id);
+                localStorage.setItem('homeworksData', JSON.stringify(homeworks));
+                renderHomework();
+            }
+        }
+
+        // 📅 ฟังก์ชันหาและดึงวันปัจจุบันของสัปดาห์ตามเวลาเครื่องผู้ใช้
+        function setupDefaultDayByCurrentDate() {
+            const daysMapping = {
+                1: 'Monday',
+                2: 'Tuesday',
+                3: 'Wednesday',
+                4: 'Thursday',
+                5: 'Friday'
+            };
+            
+            const currentDayNumber = new Date().getDay(); // 0 = อาทิตย์, 1 = จันทร์, ..., 6 = เสาร์
+            
+            // หากวันปัจจุบันคือวันจันทร์-ศุกร์ ให้ดึงวันนั้นขึ้นมา ถ้าเป็นเสาร์-อาทิตย์ ให้ Default ไปที่วันจันทร์
+            if (daysMapping[currentDayNumber]) {
+                currentSelectedDay = daysMapping[currentDayNumber];
+            } else {
+                currentSelectedDay = 'Monday';
+            }
+        }
+
+        function initUserRole() {
+            document.getElementById('userRoleSelect').value = currentUserRole;
+            changeUserRole(currentUserRole);
+        }
+
+        // เริ่มต้นการตั้งค่าตามลำดับ
+        setupDefaultDayByCurrentDate(); // ดึงวันตามจริงก่อน
+        selectDay(currentSelectedDay);  // สั่งให้แท็บวันนั้น Active และวาดตาราง
+        initUserRole();                 // ตรวจเช็คสิทธิ์ผู้ใช้งาน
     </script>
 </body>
 </html>
