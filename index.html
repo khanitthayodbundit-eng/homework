@@ -9,6 +9,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ตารางเรียนม.2/4">
+    
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/khanitthayodbundit-eng/homework/refs/heads/main/icon.png">
 </head>
 <body class="bg-slate-100 min-h-screen p-4 md:p-6 flex flex-col justify-between">
 
@@ -68,10 +70,10 @@
                 <option value="admin">👑 Admin (จัดการได้ทั้งหมด)</option>
             </select>
         </div>
-        <p class="text-[11px] text-gray-400 font-medium">© 2026 ม.2/4 ห้องประจำ 646 · สามารถติดตั้งเป็นแอปบน iPhone ได้ผ่าน Safari</p>
+        <p class="text-[11px] text-gray-400 font-medium">© 2026 ม.2/4 ห้องประจำ 646 · กดปุ่มแชร์ใน Safari แล้วเลือก "เพิ่มไปยังหน้าจอโฮม"</p>
     </footer>
 
-    <div id="scheduleModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50隔">
+    <div id="scheduleModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
             <h3 id="scheduleModalTitle" class="text-xl font-bold text-gray-800 mb-4">เพิ่มวิชาในตารางเรียน</h3>
             <form id="scheduleForm" class="space-y-4">
@@ -205,7 +207,7 @@
             { id: 36, day: "Friday", code: "ประชุม", name: "ประชุมคณะสี", teacher: "ไม่ระบุชื่อครู", start: "15:00", end: "15:50" }
         ];
 
-        const SYSTEM_VERSION = "v1.8-ios";
+        const SYSTEM_VERSION = "v1.9-pwa-icon";
         if (localStorage.getItem('sys_version') !== SYSTEM_VERSION) {
             localStorage.setItem('schedulesData', JSON.stringify(defaultSchedules));
             localStorage.setItem('sys_version', SYSTEM_VERSION);
