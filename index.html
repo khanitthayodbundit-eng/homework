@@ -346,11 +346,19 @@
             }).join('');
         }
 
+        // --- ส่วนที่ปรับปรุง: ดึงข้อมูลชื่อวิชา และ ครูผู้สอน ไปแสดงใน Dropdown หน้ารายการบ้าน ---
         function updateHomeworkSubjectSelect() {
             const select = document.getElementById('homeworkSubjectSelect');
             const todayClasses = schedules.filter(c => c.day === currentSelectedDay);
             
-            let options = todayClasses.map(c => `<option value="${c.name}">${c.name} (${c.code || 'ไม่มีรหัส'})</option>`).join('');
+            // วนลูปสร้าง Option โดยดึงชื่อวิชา รหัสวิชา และเพิ่มชื่อครูผู้สอนต่อท้ายเข้าไป
+            let options = todayClasses.map(c => {
+                const codeStr = c.code ? ` (${c.code})` : '';
+                const teacherStr = c.teacher ? ` - ครู: ${c.teacher}` : '';
+                const fullValue = `${c.name}${codeStr}${teacherStr}`;
+                return `<option value="${fullValue}">${fullValue}</option>`;
+            }).join('');
+            
             options += `<option value="งานทั่วไป/กิจกรรม">งานทั่วไป/กิจกรรม</option>`;
             select.innerHTML = options;
         }
@@ -455,7 +463,7 @@
             window.setupDefaultDayByCurrentDate();
             window.selectDay(currentSelectedDay);
             
-            // Sync Schedules (ตรงจาก Firebase เท่านั้น)
+            // Sync Schedules 
             window.dbOnValue(window.dbRef(window.db, 'schedules'), (snapshot) => {
                 const data = snapshot.val();
                 schedules = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
