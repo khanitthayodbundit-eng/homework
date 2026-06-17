@@ -158,6 +158,15 @@
                     </div>
 
                     <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">สถานะการบ้าน</label>
+                        <select id="homeworkStatus" class="w-full text-sm p-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-indigo-600" required>
+                            <option value="pending">🟡 กำลังทำ</option>
+                            <option value="none">🔴 ยังไม่สั่ง</option>
+                            <option value="done">🟢 เสร็จแล้ว</option>
+                        </select>
+                    </div>
+
+                    <div>
                         <label class="block text-xs font-bold text-slate-600 mb-1">รายละเอียดงาน</label>
                         <textarea id="homeworkTitle" rows="3" class="w-full text-sm p-2 rounded-lg border border-slate-200 focus:outline-indigo-600" placeholder="เช่น ทำแบบฝึกหัดหน้า 20 ข้อ 1-5" required></textarea>
                     </div>
@@ -192,7 +201,6 @@
         let schedules = [];
         let homeworks = [];
 
-        // --- ผูกฟังก์ชันเข้ากับ Global Scope (window) ---
         window.changeUserRole = function(role) {
             currentUserRole = role;
             localStorage.setItem('userRole', role);
@@ -227,6 +235,7 @@
             if(id === 'homeworkModal' && !document.getElementById('homeworkId').value) {
                 document.getElementById('homeworkModalTitle').innerText = '🔥 เพิ่มการบ้าน / ภารกิจ';
                 document.getElementById('homeworkForm').reset();
+                document.getElementById('homeworkStatus').value = 'pending';
                 window.toggleGroupFields('single');
                 document.getElementById('homeworkDeadline').value = new Date().toISOString().split('T')[0];
             }
@@ -269,7 +278,6 @@
             }
         }
 
-        // --- Render Data ---
         function renderSchedule() {
             const container = document.getElementById('scheduleList');
             const todayClasses = schedules.filter(c => c.day === currentSelectedDay);
@@ -313,6 +321,13 @@
                 const opacityStyle = isDone ? 'opacity-50' : '';
                 const titleStyle = isDone ? 'line-through text-gray-400' : 'text-slate-800';
                 
+                let statusBadge = `<span class="bg-amber-100 text-amber-700 font-bold text-[10px] px-2 py-0.5 rounded-md">🟡 กำลังทำ</span>`;
+                if (h.status === 'none') {
+                    statusBadge = `<span class="bg-rose-100 text-rose-700 font-bold text-[10px] px-2 py-0.5 rounded-md">🔴 ยังไม่สั่ง</span>`;
+                } else if (h.status === 'done') {
+                    statusBadge = `<span class="bg-emerald-100 text-emerald-700 font-bold text-[10px] px-2 py-0.5 rounded-md">🟢 เสร็จแล้ว</span>`;
+                }
+
                 let typeBadge = `<span class="bg-slate-100 text-slate-600 font-bold text-[10px] px-1.5 py-0.5 rounded-md mr-1">👤 งานเดี่ยว</span>`;
                 let memberInfoHtml = '';
                 
@@ -327,11 +342,12 @@
                 return `
                     <div class="p-4 bg-white border border-slate-200 rounded-xl flex items-start justify-between gap-3 shadow-xs transition-all ${opacityStyle}">
                         <div class="flex items-start gap-3 w-full">
-                            <input type="checkbox" ${isDone ? 'checked' : ''} onclick="window.toggleHwDone('${h.id}', ${isDone})" class="mt-1 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer">
+                            <input type="checkbox" ${isDone ? 'checked' : ''} onclick="window.toggleHwDone('${h.id}', '${h.status}')" class="mt-1 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer">
                             <div class="flex-1 min-w-0">
                                 <div class="flex flex-wrap gap-1 mb-1 items-center">
                                     <span class="bg-indigo-50 text-indigo-600 font-bold text-[10px] px-2 py-0.5 rounded-md">${h.subject}</span>
                                     ${typeBadge}
+                                    ${statusBadge}
                                 </div>
                                 <p class="text-sm font-medium ${titleStyle} break-words">${h.title}</p>
                                 ${memberInfoHtml}
@@ -346,15 +362,13 @@
             }).join('');
         }
 
-        // --- ส่วนที่ปรับปรุง: ดึงข้อมูลชื่อวิชา และ ครูผู้สอน ไปแสดงใน Dropdown หน้ารายการบ้าน ---
         function updateHomeworkSubjectSelect() {
             const select = document.getElementById('homeworkSubjectSelect');
             const todayClasses = schedules.filter(c => c.day === currentSelectedDay);
             
-            // วนลูปสร้าง Option โดยดึงชื่อวิชา รหัสวิชา และเพิ่มชื่อครูผู้สอนต่อท้ายเข้าไป
             let options = todayClasses.map(c => {
                 const codeStr = c.code ? ` (${c.code})` : '';
-                const teacherStr = c.teacher ? ` -  ${c.teacher}` : '';
+                const teacherStr = c.teacher ? ` - ${c.teacher}` : ''; // ตัดคำว่า "ครู :" ออกแล้ว
                 const fullValue = `${c.name}${codeStr}${teacherStr}`;
                 return `<option value="${fullValue}">${fullValue}</option>`;
             }).join('');
@@ -363,7 +377,6 @@
             select.innerHTML = options;
         }
 
-        // --- Data Mutations ---
         window.scheduleForm_submit = function(e) {
             e.preventDefault();
             const id = document.getElementById('scheduleId').value || 'sched_' + Date.now();
@@ -403,7 +416,6 @@
         window.homeworkForm_submit = function(e) {
             e.preventDefault();
             const id = document.getElementById('homeworkId').value || 'hw_' + Date.now();
-            const isEdit = !!document.getElementById('homeworkId').value;
             const type = document.getElementById('homeworkType').value;
             
             let item = {
@@ -412,15 +424,10 @@
                 type: type,
                 memberCount: type === 'group' ? document.getElementById('groupMemberCount').value : '',
                 memberNames: type === 'group' ? document.getElementById('groupMemberNames').value : '',
+                status: document.getElementById('homeworkStatus').value,
                 title: document.getElementById('homeworkTitle').value,
-                deadline: document.getElementById('homeworkDeadline').value,
-                status: 'pending'
+                deadline: document.getElementById('homeworkDeadline').value
             };
-
-            if (isEdit) {
-                const oldHw = homeworks.find(h => h.id === id);
-                if (oldHw) item.status = oldHw.status;
-            }
 
             window.dbSet(window.dbRef(window.db, `homeworks/${id}`), item)
                 .then(() => closeModal('homeworkModal'));
@@ -439,6 +446,7 @@
                 document.getElementById('groupMemberNames').value = h.memberNames || '';
             }
 
+            document.getElementById('homeworkStatus').value = h.status || 'pending';
             document.getElementById('homeworkTitle').value = h.title;
             document.getElementById('homeworkDeadline').value = h.deadline;
             
@@ -447,8 +455,9 @@
         }
 
         window.toggleHwDone = function(id, currentStatus) {
+            const nextStatus = (currentStatus === 'done') ? 'pending' : 'done';
             window.dbUpdate(window.dbRef(window.db, `homeworks/${id}`), {
-                status: currentStatus ? 'pending' : 'done'
+                status: nextStatus
             });
         }
 
@@ -458,12 +467,10 @@
             }
         }
 
-        // --- Core Init ---
         function initApp() {
             window.setupDefaultDayByCurrentDate();
             window.selectDay(currentSelectedDay);
             
-            // Sync Schedules 
             window.dbOnValue(window.dbRef(window.db, 'schedules'), (snapshot) => {
                 const data = snapshot.val();
                 schedules = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
@@ -471,7 +478,6 @@
                 updateHomeworkSubjectSelect();
             });
 
-            // Sync Homeworks
             window.dbOnValue(window.dbRef(window.db, 'homeworks'), (snapshot) => {
                 const data = snapshot.val();
                 homeworks = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
