@@ -16,15 +16,15 @@
         import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
-  apiKey: "AIzaSyB5ufCK1MfakgMnfE9B0ZnQLlTUfpnDirQ",
-  authDomain: "myhomework-4621e.firebaseapp.com",
-  databaseURL: "https://myhomework-4621e-default-rtdb.firebaseio.com",
-  projectId: "myhomework-4621e",
-  storageBucket: "myhomework-4621e.firebasestorage.app",
-  messagingSenderId: "993446656066",
-  appId: "1:993446656066:web:11174ba8bc0e9ff44095db",
-  measurementId: "G-Q5KH4YZ1LD"
-};
+            apiKey: "AIzaSyB5ufCK1MfakgMnfE9B0ZnQLlTUfpnDirQ",
+            authDomain: "myhomework-4621e.firebaseapp.com",
+            databaseURL: "https://myhomework-4621e-default-rtdb.firebaseio.com",
+            projectId: "myhomework-4621e",
+            storageBucket: "myhomework-4621e.firebasestorage.app",
+            messagingSenderId: "993446656066",
+            appId: "1:993446656066:web:11174ba8bc0e9ff44095db",
+            measurementId: "G-Q5KH4YZ1LD"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
@@ -48,10 +48,10 @@
                 <p class="text-sm text-gray-500">ตารางเรียน ชั้น ม. 2/4 ห้องประจำ 646 (ระบบอัปเดตแบบ Realtime ทั้งห้อง)</p>
             </div>
             <div class="flex gap-2 w-full sm:w-auto">
-                <button id="openScheduleBtn" class="flex-1 sm:flex-initial bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2.5 rounded-xl shadow-md transition cursor-pointer text-sm hidden">
+                <button id="openScheduleBtn" onclick="openModal('scheduleModal')" class="flex-1 sm:flex-initial bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2.5 rounded-xl shadow-md transition cursor-pointer text-sm hidden">
                     + เพิ่มวิชาเรียน
                 </button>
-                <button id="openHomeworkBtn" class="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl shadow-md transition cursor-pointer text-sm">
+                <button id="openHomeworkBtn" onclick="openModal('homeworkModal')" class="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl shadow-md transition cursor-pointer text-sm">
                     + เพิ่มการบ้าน
                 </button>
             </div>
@@ -78,6 +78,82 @@
         </main>
     </div>
 
+    <div id="scheduleModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
+            <h3 id="scheduleModalTitle" class="text-lg font-bold text-slate-800 mb-4">📖 เพิ่มวิชาเรียน</h3>
+            <form id="scheduleForm" onsubmit="scheduleForm_submit(event)">
+                <input type="hidden" id="scheduleId">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">วันเรียน</label>
+                        <select id="scheduleDay" class="w-full text-sm p-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-indigo-600" required>
+                            <option value="Monday">วันจันทร์</option>
+                            <option value="Tuesday">วันอังคาร</option>
+                            <option value="Wednesday">วันพุธ</option>
+                            <option value="Thursday">วันพฤหัสบดี</option>
+                            <option value="Friday">วันศุกร์</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="col-span-1">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">รหัสวิชา</label>
+                            <input type="text" id="scheduleCode" class="w-full text-sm p-2 rounded-lg border border-slate-200 focus:outline-indigo-600" placeholder="ท22101">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">ชื่อวิชา</label>
+                            <input type="text" id="scheduleName" class="w-full text-sm p-2 rounded-lg border border-slate-200 focus:outline-indigo-600" placeholder="ภาษาไทย" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">ครูผู้สอน</label>
+                        <input type="text" id="scheduleTeacher" class="w-full text-sm p-2 rounded-lg border border-slate-200 focus:outline-indigo-600" placeholder="ครูผู้สอน">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">เวลาเริ่ม</label>
+                            <input type="time" id="scheduleStart" class="w-full text-sm p-2 rounded-lg border border-slate-200 focus:outline-indigo-600" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">เวลาสิ้นสุด</label>
+                            <input type="time" id="scheduleEnd" class="w-full text-sm p-2 rounded-lg border border-slate-200 focus:outline-indigo-600" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-6">
+                    <button type="button" onclick="closeModal('scheduleModal')" class="flex-1 py-2 text-sm font-medium text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-xl transition">ยกเลิก</button>
+                    <button type="submit" class="flex-1 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-md transition">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="homeworkModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
+            <h3 id="homeworkModalTitle" class="text-lg font-bold text-slate-800 mb-4">🔥 เพิ่มการบ้าน / ภารกิจ</h3>
+            <form id="homeworkForm" onsubmit="homeworkForm_submit(event)">
+                <input type="hidden" id="homeworkId">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">วิชาเรียน (อิงจากตารางเรียนวันนี้)</label>
+                        <select id="homeworkSubjectSelect" class="w-full text-sm p-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-indigo-600" required></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">รายละเอียดงาน</label>
+                        <textarea id="homeworkTitle" rows="3" class="w-full text-sm p-2 rounded-lg border border-slate-200 focus:outline-indigo-600" placeholder="เช่น ทำแบบฝึกหัดหน้า 20 ข้อ 1-5" required></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">กำหนดส่ง</label>
+                        <input type="date" id="homeworkDeadline" class="w-full text-sm p-2 rounded-lg border border-slate-200 focus:outline-indigo-600" required>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-6">
+                    <button type="button" onclick="closeModal('homeworkModal')" class="flex-1 py-2 text-sm font-medium text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-xl transition">ยกเลิก</button>
+                    <button type="submit" class="flex-1 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <footer class="w-full text-center py-6 border-t border-slate-200 flex flex-col items-center justify-center gap-3">
         <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-xs border border-slate-200">
             <label for="userRoleSelect" class="text-xs font-bold text-slate-600">🔐 สิทธิ์ผู้ใช้งาน:</label>
@@ -96,21 +172,129 @@
         let schedules = [];
         let homeworks = [];
 
-        // Functions เหมือนเดิม ไม่มีการเปลี่ยนแปลง
-        // ... (toggleGroupFields, changeUserRole, openScheduleBtn_click, openHomeworkBtn_click, openModal, closeModal, selectDay, scheduleForm_submit, openEditSchedule, homeworkForm_submit, openEditHomework, toggleHwDone, renderHomework, updateHomeworkSubjectSelect, deleteSchedule, deleteHomework, setupDefaultDayByCurrentDate, initUserRole)
+        const defaultSchedules = [
+            { id: "mon_1", day: "Monday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "08:30", end: "09:20" },
+            { id: "mon_2", day: "Monday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "09:20", end: "10:10" },
+            { id: "mon_3", day: "Monday", code: "ว22222", name: "ว.บังคับมือ", teacher: "ครูณัฐวุฒิ", start: "10:10", end: "11:00" },
+            { id: "mon_4", day: "Monday", code: "ว22222", name: "ว.บังคับมือ", teacher: "ครูณัฐวุฒิ", start: "11:00", end: "11:50" },
+            { id: "mon_5", day: "Monday", code: "ค22103", name: "คณิตศาสตร์", teacher: "ครูยุทธพร", start: "12:40", end: "13:30" },
+            { id: "mon_6", day: "Monday", code: "120201", name: "IS1", teacher: "ครูอทุมพร", start: "13:30", end: "14:20" },
+            { id: "mon_7", day: "Monday", code: "พ22103", name: "พลศึกษา", teacher: "ครูอดิศร", start: "14:20", end: "15:10" },
+            { id: "tue_1", day: "Tuesday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "08:30", end: "09:20" },
+            { id: "tue_2", day: "Tuesday", code: "ง22101", name: "การงานอาชีพ", teacher: "ครูสุพิชชา", start: "09:20", end: "10:10" },
+            { id: "tue_3", day: "Tuesday", code: "ง22101", name: "การงานอาชีพ", teacher: "ครูสุพิชชา", start: "10:10", end: "11:00" },
+            { id: "tue_4", day: "Tuesday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอlongกรณื", start: "11:00", end: "11:50" },
+            { id: "tue_5", day: "Tuesday", code: "ศ22101", name: "ศิลปะ/ดนตรี", teacher: "ครูสมฤกษ์", start: "12:40", end: "13:30" },
+            { id: "tue_6", day: "Tuesday", code: "สาธารณฯ", name: "สาธารณประโยชน์", teacher: "ครูคุณธรรม", start: "13:30", end: "14:20" },
+            { id: "tue_7", day: "Tuesday", code: "ลส./นน.", name: "ลูกเสือ/เนตรนารี", teacher: "ครูยุทธการ", start: "14:20", end: "15:10" },
+            { id: "tue_8", day: "Tuesday", code: "ก22905", name: "แนะแนว", teacher: "ครูธีราพร", start: "15:10", end: "16:00" },
+            { id: "wed_1", day: "Wednesday", code: "ENG_SCI", name: "English Science", teacher: "ครูStephani", start: "08:30", end: "09:20" },
+            { id: "wed_2", day: "Wednesday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "09:20", end: "10:10" },
+            { id: "wed_3", day: "Wednesday", code: "ค22113", name: "คณิตศาสตร์", teacher: "ครูอทุมพร", start: "10:10", end: "11:00" },
+            { id: "wed_4", day: "Wednesday", code: "อ22101", name: "ภาษาอังกฤษ", teacher: "ครูดวงเดือ", start: "11:00", end: "11:50" },
+            { id: "wed_5", day: "Wednesday", code: "พ22101", name: "สุขศึกษา", teacher: "ครูอภัสรา", start: "12:40", end: "13:30" },
+            { id: "wed_6", day: "Wednesday", code: "ค22101", name: "คณิตศาสตร์", teacher: "ครูภัสรดา", start: "13:30", end: "14:20" },
+            { id: "wed_7", day: "Wednesday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "14:20", end: "15:10" },
+            { id: "wed_8", day: "Wednesday", code: "ENG_CON", name: "English Conversation", teacher: "ครูNathan", start: "15:10", end: "16:00" },
+            { id: "thu_1", day: "Thursday", code: "ว22101", name: "วิทยาศาสตร์", teacher: "ครูรัตนกร", start: "08:30", end: "09:20" },
+            { id: "thu_2", day: "Thursday", code: "ว22101", name: "วิทยาศาสตร์", teacher: "ครูรัตนกร", start: "09:20", end: "10:10" },
+            { id: "thu_3", day: "Thursday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "10:10", end: "11:00" },
+            { id: "thu_4", day: "Thursday", code: "ค22101", name: "คณิตศาสตร์", teacher: "ครูภัสรดา", start: "11:00", end: "11:50" },
+            { id: "thu_5", day: "Thursday", code: "อ22101", name: "ภาษาอังกฤษ", teacher: "ครูดวงเดือ", start: "12:40", end: "13:30" },
+            { id: "thu_6", day: "Thursday", code: "ค22113", name: "คณิตศาสตร์", teacher: "ครูอทุมพร", start: "13:30", end: "14:20" },
+            { id: "thu_7", day: "Thursday", code: "ส22103", name: "ประวัติศาสตร์", teacher: "ครูนิรุช", start: "14:20", end: "15:10" },
+            { id: "thu_8", day: "Thursday", code: "120201", name: "IS1", teacher: "ครูอทุมพร", start: "15:10", end: "16:00" },
+            { id: "fri_1", day: "Friday", code: "ว22227", name: "วิทยาการคำนวณ", teacher: "ครูจีระศักดิ์", start: "08:30", end: "09:20" },
+            { id: "fri_2", day: "Friday", code: "ว22227", name: "วิทยาการคำนวณ", teacher: "ครูจีระศักดิ์", start: "09:20", end: "10:10" },
+            { id: "fri_3", day: "Friday", code: "ศ22101", name: "ศิลปะ/นาฏศิลป์", teacher: "ครูวีณา", start: "10:10", end: "11:00" },
+            { id: "fri_4", day: "Friday", code: "ค22101", name: "คณิตศาสตร์", teacher: "ครูภัสรดา", start: "11:00", end: "11:50" },
+            { id: "fri_5", day: "Friday", code: "อ22101", name: "ภาษาอังกฤษ", teacher: "ครูดวงเดือ", start: "12:40", end: "13:30" },
+            { id: "fri_6", day: "Friday", code: "PISA", name: "เตรียม PISA", teacher: "ครูผู้สอน", start: "13:30", end: "14:20" },
+            { id: "fri_7", day: "Friday", code: "ชุมนุม", name: "กิจกรรมชุมนุม", teacher: "ครูผู้สอน", start: "14:20", end: "15:10" },
+            { id: "fri_8", day: "Friday", code: "ประชุม", name: "ประชุมคณะสี", teacher: "ครูผู้สอน", start: "15:10", end: "16:00" }
+        ];
 
-        // 💡 อัปเดต initFirebaseListeners: เพื่อให้ดันข้อมูล default ครบถ้วน
+        // --- UI & Role Control ---
+        function changeUserRole(role) {
+            currentUserRole = role;
+            localStorage.setItem('userRole', role);
+            const btn = document.getElementById('openScheduleBtn');
+            if (role === 'admin') {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+            renderSchedule();
+            renderHomework();
+        }
+
+        function initUserRole() {
+            document.getElementById('userRoleSelect').value = currentUserRole;
+            changeUserRole(currentUserRole);
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            if(id === 'scheduleModal' && !document.getElementById('scheduleId').value) {
+                document.getElementById('scheduleModalTitle').innerText = '📖 เพิ่มวิชาเรียน';
+                document.getElementById('scheduleForm').reset();
+                document.getElementById('scheduleDay').value = currentSelectedDay;
+            }
+            if(id === 'homeworkModal' && !document.getElementById('homeworkId').value) {
+                document.getElementById('homeworkModalTitle').innerText = '🔥 เพิ่มการบ้าน / ภารกิจ';
+                document.getElementById('homeworkForm').reset();
+                document.getElementById('homeworkDeadline').value = new Date().toISOString().split('T')[0];
+            }
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            if(id === 'scheduleModal') document.getElementById('scheduleId').value = '';
+            if(id === 'homeworkModal') document.getElementById('homeworkId').value = '';
+        }
+
+        function selectDay(day) {
+            currentSelectedDay = day;
+            document.querySelectorAll('.day-tab').forEach(tab => {
+                tab.className = "day-tab flex-1 min-w-[95px] text-center py-3 rounded-xl font-black text-xs transition-all duration-200 cursor-pointer shadow-xs bg-white text-slate-700 border border-slate-200";
+            });
+            
+            const activeColors = {
+                Monday: 'bg-yellow-400 text-slate-900 border-yellow-400',
+                Tuesday: 'bg-pink-400 text-white border-pink-400',
+                Wednesday: 'bg-emerald-500 text-white border-emerald-500',
+                Thursday: 'bg-orange-500 text-white border-orange-500',
+                Friday: 'bg-sky-500 text-white border-sky-500'
+            };
+            
+            document.getElementById(`tab-${day}`).className = `day-tab flex-1 min-w-[95px] text-center py-3 rounded-xl font-black text-xs transition-all duration-200 cursor-pointer shadow-md scale-105 ${activeColors[day]}`;
+            
+            renderSchedule();
+            updateHomeworkSubjectSelect();
+            renderHomework();
+        }
+
+        function setupDefaultDayByCurrentDate() {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const today = days[new Date().getDay()];
+            if(today !== 'Sunday' && today !== 'Saturday') {
+                currentSelectedDay = today;
+            } else {
+                currentSelectedDay = 'Monday';
+            }
+        }
+
+        // --- Firebase Listeners ---
         function initFirebaseListeners() {
             if (!window.db) {
                 setTimeout(initFirebaseListeners, 500);
                 return;
             }
 
+            // Sync Schedules
             window.dbOnValue(window.dbRef(window.db, 'schedules'), (snapshot) => {
                 const data = snapshot.val();
-                
                 if (!data) {
-                    // ถ้า Firebase โล่ง ให้ระบบดันข้อมูล default ทั้งหมดเข้าไปเปิดซิงค์ทันที!
                     defaultSchedules.forEach(item => {
                         window.dbSet(window.dbRef(window.db, `schedules/${item.id}`), {
                             day: item.day, code: item.code, name: item.name, teacher: item.teacher, start: item.start, end: item.end
@@ -118,15 +302,24 @@
                     });
                     return;
                 }
-
                 schedules = Object.keys(data).map(key => ({ id: key, ...data[key] }));
                 renderSchedule();
                 updateHomeworkSubjectSelect();
             });
 
-            // ... (ฟังเฝ้าการอัปเดตการบ้าน เหมือนเดิม)
+            // Sync Homeworks
+            window.dbOnValue(window.dbRef(window.db, 'homeworks'), (snapshot) => {
+                const data = snapshot.val();
+                if (!data) {
+                    homeworks = [];
+                } else {
+                    homeworks = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                }
+                renderHomework();
+            });
         }
 
+        // --- Render Data ---
         function renderSchedule() {
             const container = document.getElementById('scheduleList');
             const todayClasses = schedules.filter(c => c.day === currentSelectedDay);
@@ -141,8 +334,8 @@
                 const codeBadge = c.code ? `<span class="bg-slate-200 text-slate-700 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded mr-1.5">${c.code}</span>` : '';
                 const adminControls = currentUserRole === 'admin' ? `
                     <div class="flex items-center gap-2 shrink-0">
-                        <button onclick="openEditSchedule('${c.id}')" class="text-slate-400 hover:text-indigo-600 text-sm p-1">✏️</button>
-                        <button onclick="deleteSchedule('${c.id}')" class="text-gray-300 hover:text-red-500 text-xs font-bold p-1">✕</button>
+                        <button onclick="openEditSchedule('${c.id}')" class="text-slate-400 hover:text-indigo-600 text-sm p-1 cursor-pointer">✏️</button>
+                        <button onclick="deleteSchedule('${c.id}')" class="text-gray-300 hover:text-red-500 text-xs font-bold p-1 cursor-pointer">✕</button>
                     </div>` : '';
                 return `
                     <div class="p-3 ${currentDayColor.bg} border-l-4 ${currentDayColor.border} rounded-xl flex justify-between items-center shadow-xs">
@@ -156,8 +349,135 @@
             }).join('');
         }
 
-        // ... (Functions ที่เหลือทั้งหมด)
-        
+        function renderHomework() {
+            const container = document.getElementById('homeworkList');
+            const todayHomeworks = homeworks.filter(h => h.day === currentSelectedDay);
+            
+            if(todayHomeworks.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-400 py-12 text-sm">🎉 ยินดีด้วย! วันนี้ไม่มีการบ้านหรือภารกิจ</p>`;
+                return;
+            }
+
+            container.innerHTML = todayHomeworks.map(h => {
+                const isDone = h.status === 'done';
+                const opacityStyle = isDone ? 'opacity-50' : '';
+                const titleStyle = isDone ? 'line-through text-gray-400' : 'text-slate-800';
+                
+                return `
+                    <div class="p-4 bg-white border border-slate-200 rounded-xl flex items-start justify-between gap-3 shadow-xs transition-all ${opacityStyle}">
+                        <div class="flex items-start gap-3">
+                            <input type="checkbox" ${isDone ? 'checked' : ''} onclick="toggleHwDone('${h.id}', ${isDone})" class="mt-1 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer">
+                            <div>
+                                <span class="inline-block bg-indigo-50 text-indigo-600 font-bold text-[10px] px-2 py-0.5 rounded-md mb-1">${h.subject}</span>
+                                <p class="text-sm font-medium ${titleStyle} break-words max-w-[180px] sm:max-w-md">${h.title}</p>
+                                <p class="text-[11px] font-bold text-rose-500 mt-2 flex items-center gap-1">📅 ส่ง: ${h.deadline}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="openEditHomework('${h.id}')" class="text-slate-400 hover:text-indigo-600 text-xs p-1 cursor-pointer">✏️</button>
+                            <button onclick="deleteHomework('${h.id}')" class="text-gray-300 hover:text-red-500 text-sm p-1 cursor-pointer">✕</button>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function updateHomeworkSubjectSelect() {
+            const select = document.getElementById('homeworkSubjectSelect');
+            const todayClasses = schedules.filter(c => c.day === currentSelectedDay);
+            
+            let options = todayClasses.map(c => `<option value="${c.name}">${c.name} (${c.code || 'ไม่มีรหัส'})</option>`).join('');
+            if(!options) {
+                options = `<option value="งานทั่วไป/กิจกรรม">งานทั่วไป/กิจกรรม</option>`;
+            } else {
+                options += `<option value="งานทั่วไป/กิจกรรม">งานทั่วไป/กิจกรรม</option>`;
+            }
+            select.innerHTML = options;
+        }
+
+        // --- Data Mutations ---
+        function scheduleForm_submit(e) {
+            e.preventDefault();
+            const id = document.getElementById('scheduleId').value || 'sched_' + Date.now();
+            const item = {
+                day: document.getElementById('scheduleDay').value,
+                code: document.getElementById('scheduleCode').value,
+                name: document.getElementById('scheduleName').value,
+                teacher: document.getElementById('scheduleTeacher').value,
+                start: document.getElementById('scheduleStart').value,
+                end: document.getElementById('scheduleEnd').value
+            };
+            window.dbSet(window.dbRef(window.db, `schedules/${id}`), item)
+                .then(() => closeModal('scheduleModal'));
+        }
+
+        function openEditSchedule(id) {
+            const c = schedules.find(item => item.id === id);
+            if(!c) return;
+            document.getElementById('scheduleId').value = c.id;
+            document.getElementById('scheduleDay').value = c.day;
+            document.getElementById('scheduleCode').value = c.code || '';
+            document.getElementById('scheduleName').value = c.name;
+            document.getElementById('scheduleTeacher').value = c.teacher || '';
+            document.getElementById('scheduleStart').value = c.start;
+            document.getElementById('scheduleEnd').value = c.end;
+            
+            document.getElementById('scheduleModalTitle').innerText = '✏️ แก้ไขวิชาเรียน';
+            openModal('scheduleModal');
+        }
+
+        function deleteSchedule(id) {
+            if(confirm('ต้องการลบวิชาเรียนนี้ใช่หรือไม่? ข้อมูลใน Firebase จะหายไปทันที')) {
+                window.dbRemove(window.dbRef(window.db, `schedules/${id}`));
+            }
+        }
+
+        function homeworkForm_submit(e) {
+            e.preventDefault();
+            const id = document.getElementById('homeworkId').value || 'hw_' + Date.now();
+            const isEdit = !!document.getElementById('homeworkId').value;
+            
+            let item = {
+                day: currentSelectedDay,
+                subject: document.getElementById('homeworkSubjectSelect').value,
+                title: document.getElementById('homeworkTitle').value,
+                deadline: document.getElementById('homeworkDeadline').value,
+                status: 'pending'
+            };
+
+            if (isEdit) {
+                const oldHw = homeworks.find(h => h.id === id);
+                if (oldHw) item.status = oldHw.status;
+            }
+
+            window.dbSet(window.dbRef(window.db, `homeworks/${id}`), item)
+                .then(() => closeModal('homeworkModal'));
+        }
+
+        function openEditHomework(id) {
+            const h = homeworks.find(item => item.id === id);
+            if(!h) return;
+            document.getElementById('homeworkId').value = h.id;
+            document.getElementById('homeworkSubjectSelect').value = h.subject;
+            document.getElementById('homeworkTitle').value = h.title;
+            document.getElementById('homeworkDeadline').value = h.deadline;
+            
+            document.getElementById('homeworkModalTitle').innerText = '✏️ แก้ไขการบ้าน';
+            openModal('homeworkModal');
+        }
+
+        function toggleHwDone(id, currentStatus) {
+            window.dbUpdate(window.dbRef(window.db, `homeworks/${id}`), {
+                status: currentStatus ? 'pending' : 'done'
+            });
+        }
+
+        function deleteHomework(id) {
+            if(confirm('ต้องการลบการบ้านนี้ใช่หรือไม่?')) {
+                window.dbRemove(window.dbRef(window.db, `homeworks/${id}`));
+            }
+        }
+
+        // --- Core Init ---
         setupDefaultDayByCurrentDate();
         selectDay(currentSelectedDay);
         initUserRole();
