@@ -96,54 +96,6 @@
         let schedules = [];
         let homeworks = [];
 
-        // 📚 ข้อมูลวิชาเรียนครบถ้วนจากตารางเรียน ม.2/4 ภาคเรียนที่ 1/2569
-        const defaultSchedules = [
-            // วันจันทร์
-            { id: "mon_1", day: "Monday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "08:30", end: "09:20" },
-            { id: "mon_2", day: "Monday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "09:20", end: "10:10" },
-            { id: "mon_3", day: "Monday", code: "ว22222", name: "ว.บังคับมือ", teacher: "ครูณัฐวุฒิ", start: "10:10", end: "11:00" },
-            { id: "mon_4", day: "Monday", code: "ว22222", name: "ว.บังคับมือ", teacher: "ครูณัฐวุฒิ", start: "11:00", end: "11:50" },
-            { id: "mon_5", day: "Monday", code: "ค22103", name: "คณิตศาสตร์", teacher: "ครูยุทธพร", start: "12:40", end: "13:30" },
-            { id: "mon_6", day: "Monday", code: "120201", name: "IS1", teacher: "ครูอทุมพร", start: "13:30", end: "14:20" },
-            { id: "mon_7", day: "Monday", code: "พ22103", name: "พลศึกษา", teacher: "ครูอดิศร", start: "14:20", end: "15:10" },
-            // วันอังคาร
-            { id: "tue_1", day: "Tuesday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "08:30", end: "09:20" },
-            { id: "tue_2", day: "Tuesday", code: "ง22101", name: "การงานอาชีพ", teacher: "ครูสุพิชชา", start: "09:20", end: "10:10" },
-            { id: "tue_3", day: "Tuesday", code: "ง22101", name: "การงานอาชีพ", teacher: "ครูสุพิชชา", start: "10:10", end: "11:00" },
-            { id: "tue_4", day: "Tuesday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "11:00", end: "11:50" },
-            { id: "tue_5", day: "Tuesday", code: "ศ22101", name: "ศิลปะ/ดนตรี", teacher: "ครูสมฤกษ์", start: "12:40", end: "13:30" },
-            { id: "tue_6", day: "Tuesday", code: "สาธารณฯ", name: "สาธารณประโยชน์", teacher: "ครูคุณธรรม", start: "13:30", end: "14:20" },
-            { id: "tue_7", day: "Tuesday", code: "ลส./นน.", name: "ลูกเสือ/เนตรนารี", teacher: "ครูยุทธการ", start: "14:20", end: "15:10" },
-            { id: "tue_8", day: "Tuesday", code: "ก22905", name: "แนะแนว", teacher: "ครูธีราพร", start: "15:10", end: "16:00" },
-            // วันพุธ
-            { id: "wed_1", day: "Wednesday", code: "ENG_SCI", name: "English Science", teacher: "ครูStephani", start: "08:30", end: "09:20" },
-            { id: "wed_2", day: "Wednesday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "09:20", end: "10:10" },
-            { id: "wed_3", day: "Wednesday", code: "ค22113", name: "คณิตศาสตร์", teacher: "ครูอทุมพร", start: "10:10", end: "11:00" },
-            { id: "wed_4", day: "Wednesday", code: "อ22101", name: "ภาษาอังกฤษ", teacher: "ครูดวงเดือ", start: "11:00", end: "11:50" },
-            { id: "wed_5", day: "Wednesday", code: "พ22101", name: "สุขศึกษา", teacher: "ครูอภัสรา", start: "12:40", end: "13:30" },
-            { id: "wed_6", day: "Wednesday", code: "ค22101", name: "คณิตศาสตร์", teacher: "ครูภัสรดา", start: "13:30", end: "14:20" },
-            { id: "wed_7", day: "Wednesday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "14:20", end: "15:10" },
-            { id: "wed_8", day: "Wednesday", code: "ENG_CON", name: "English Conversation", teacher: "ครูNathan", start: "15:10", end: "16:00" },
-            // วันพฤหัสบดี
-            { id: "thu_1", day: "Thursday", code: "ว22101", name: "วิทยาศาสตร์", teacher: "ครูรัตนกร", start: "08:30", end: "09:20" },
-            { id: "thu_2", day: "Thursday", code: "ว22101", name: "วิทยาศาสตร์", teacher: "ครูรัตนกร", start: "09:20", end: "10:10" },
-            { id: "thu_3", day: "Thursday", code: "ส22101", name: "สังคมศึกษา", teacher: "ครูอลงกรณ์", start: "10:10", end: "11:00" },
-            { id: "thu_4", day: "Thursday", code: "ค22101", name: "คณิตศาสตร์", teacher: "ครูภัสรดา", start: "11:00", end: "11:50" },
-            { id: "thu_5", day: "Thursday", code: "อ22101", name: "ภาษาอังกฤษ", teacher: "ครูดวงเดือ", start: "12:40", end: "13:30" },
-            { id: "thu_6", day: "Thursday", code: "ค22113", name: "คณิตศาสตร์", teacher: "ครูอทุมพร", start: "13:30", end: "14:20" },
-            { id: "thu_7", day: "Thursday", code: "ส22103", name: "ประวัติศาสตร์", teacher: "ครูนิรุช", start: "14:20", end: "15:10" },
-            { id: "thu_8", day: "Thursday", code: "120201", name: "IS1", teacher: "ครูอทุมพร", start: "15:10", end: "16:00" },
-            // วันศุกร์
-            { id: "fri_1", day: "Friday", code: "ว22227", name: "วิทยาการคำนวณ", teacher: "ครูจีระศักดิ์", start: "08:30", end: "09:20" },
-            { id: "fri_2", day: "Friday", code: "ว22227", name: "วิทยาการคำนวณ", teacher: "ครูจีระศักดิ์", start: "09:20", end: "10:10" },
-            { id: "fri_3", day: "Friday", code: "ศ22101", name: "ศิลปะ/นาฏศิลป์", teacher: "ครูวีณา", start: "10:10", end: "11:00" },
-            { id: "fri_4", day: "Friday", code: "ค22101", name: "คณิตศาสตร์", teacher: "ครูภัสรดา", start: "11:00", end: "11:50" },
-            { id: "fri_5", day: "Friday", code: "อ22101", name: "ภาษาอังกฤษ", teacher: "ครูดวงเดือ", start: "12:40", end: "13:30" },
-            { id: "fri_6", day: "Friday", code: "PISA", name: "เตรียม PISA", teacher: "ครูผู้สอน", start: "13:30", end: "14:20" },
-            { id: "fri_7", day: "Friday", code: "ชุมนุม", name: "กิจกรรมชุมนุม", teacher: "ครูผู้สอน", start: "14:20", end: "15:10" },
-            { id: "fri_8", day: "Friday", code: "ประชุม", name: "ประชุมคณะสี", teacher: "ครูผู้สอน", start: "15:10", end: "16:00" }
-        ];
-
         // Functions เหมือนเดิม ไม่มีการเปลี่ยนแปลง
         // ... (toggleGroupFields, changeUserRole, openScheduleBtn_click, openHomeworkBtn_click, openModal, closeModal, selectDay, scheduleForm_submit, openEditSchedule, homeworkForm_submit, openEditHomework, toggleHwDone, renderHomework, updateHomeworkSubjectSelect, deleteSchedule, deleteHomework, setupDefaultDayByCurrentDate, initUserRole)
 
