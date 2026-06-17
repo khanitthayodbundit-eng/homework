@@ -354,7 +354,7 @@
             // วนลูปสร้าง Option โดยดึงชื่อวิชา รหัสวิชา และเพิ่มชื่อครูผู้สอนต่อท้ายเข้าไป
             let options = todayClasses.map(c => {
                 const codeStr = c.code ? ` (${c.code})` : '';
-                const teacherStr = c.teacher ? ` - ครู: ${c.teacher}` : '';
+                const teacherStr = c.teacher ? ` -  ${c.teacher}` : '';
                 const fullValue = `${c.name}${codeStr}${teacherStr}`;
                 return `<option value="${fullValue}">${fullValue}</option>`;
             }).join('');
