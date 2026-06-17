@@ -2,9 +2,9 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Class & Homework Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -16,9 +16,17 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        window.db = db; window.dbRef = ref; window.dbSet = set;
-        window.dbOnValue = onValue; window.dbRemove = remove; window.dbUpdate = update;
-        window.dispatchEvent(new Event('firebase-ready'));
+        
+        // ส่งออกตัวแปรให้ window เข้าถึงได้
+        window.db = db;
+        window.dbRef = ref;
+        window.dbSet = set;
+        window.dbOnValue = onValue;
+        window.dbRemove = remove;
+        window.dbUpdate = update;
+        
+        // เมื่อโหลดเสร็จให้เริ่มรันระบบ
+        window.initSystem();
     </script>
 </head>
 <body class="bg-slate-100 p-4">
@@ -31,9 +39,7 @@
             </div>
         </header>
 
-        <nav class="flex gap-2 mb-6 overflow-x-auto pb-2">
-            ${['Monday','Tuesday','Wednesday','Thursday','Friday'].map(d => `<button onclick="window.selectDay('${d}')" class="bg-white px-4 py-2 rounded-lg shadow">${d}</button>`).join('')}
-        </nav>
+        <nav id="dayNav" class="flex gap-2 mb-6 overflow-x-auto pb-2"></nav>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <section class="bg-white p-5 rounded-2xl shadow">
@@ -52,57 +58,43 @@
             <form onsubmit="window.saveSchedule(event)">
                 <input type="text" id="sName" placeholder="ชื่อวิชา" class="w-full border p-2 mb-2" required>
                 <button type="submit" class="bg-amber-500 text-white w-full py-2 rounded">บันทึก</button>
-                <button type="button" onclick="window.closeModal('scheduleModal')" class="mt-2 w-full">ยกเลิก</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="homeworkModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-2xl w-full max-w-sm">
-            <form onsubmit="window.saveHomework(event)">
-                <select id="hwType" onchange="window.toggleGroup(this.value)" class="w-full border p-2 mb-2">
-                    <option value="single">งานเดี่ยว</option>
-                    <option value="group">งานกลุ่ม</option>
-                </select>
-                <div id="groupDiv" class="hidden mb-2">
-                    <input type="number" id="memCount" placeholder="จำนวนคน" class="w-full border p-2 mb-1">
-                    <textarea id="memNames" placeholder="รายชื่อสมาชิก" class="w-full border p-2"></textarea>
-                </div>
-                <input type="text" id="hwTitle" placeholder="รายละเอียดงาน" class="w-full border p-2 mb-2" required>
-                <select id="hwStatus" class="w-full border p-2 mb-2">
-                    <option value="not-started">ยังไม่เริ่ม</option>
-                    <option value="in-progress">กำลังทำ</option>
-                    <option value="done">เสร็จแล้ว</option>
-                </select>
-                <button type="submit" class="bg-indigo-600 text-white w-full py-2 rounded">บันทึก</button>
-                <button type="button" onclick="window.closeModal('homeworkModal')" class="mt-2 w-full">ยกเลิก</button>
             </form>
         </div>
     </div>
 
     <script>
         let currentDay = 'Monday', role = localStorage.getItem('userRole') || 'student';
-        window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-        window.selectDay = (d) => { currentDay = d; render(); };
-        window.toggleGroup = (v) => document.getElementById('groupDiv').classList.toggle('hidden', v !== 'group');
+        const days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
 
-        window.saveSchedule = (e) => { e.preventDefault(); const id = 's_'+Date.now(); window.dbSet(window.dbRef(window.db, 'schedules/'+id), { name: document.getElementById('sName').value, day: currentDay }); window.closeModal('scheduleModal'); };
-        window.saveHomework = (e) => { e.preventDefault(); const id = 'h_'+Date.now(); window.dbSet(window.dbRef(window.db, 'homeworks/'+id), { 
-            title: document.getElementById('hwTitle').value, 
-            type: document.getElementById('hwType').value, 
-            memberCount: document.getElementById('memCount').value,
-            memberNames: document.getElementById('memNames').value,
-            status: document.getElementById('hwStatus').value,
-            day: currentDay 
-        }); window.closeModal('homeworkModal'); };
+        window.initSystem = () => {
+            // สร้างปุ่มนำทางด้วย JS แทน Template ใน HTML
+            const nav = document.getElementById('dayNav');
+            days.forEach(d => {
+                const btn = document.createElement('button');
+                btn.className = "bg-white px-4 py-2 rounded-lg shadow";
+                btn.innerText = d;
+                btn.onclick = () => { currentDay = d; render(); };
+                nav.appendChild(btn);
+            });
+            render();
+            
+            // ดึงข้อมูล
+            window.dbOnValue(window.dbRef(window.db, 'schedules'), (s) => { window.schedules = s.val() || {}; render(); });
+            window.dbOnValue(window.dbRef(window.db, 'homeworks'), (s) => { window.homeworks = s.val() || {}; render(); });
+        };
+
+        window.saveSchedule = (e) => { 
+            e.preventDefault(); 
+            const id = 's_'+Date.now(); 
+            window.dbSet(window.dbRef(window.db, 'schedules/'+id), { name: document.getElementById('sName').value, day: currentDay }); 
+            document.getElementById('scheduleModal').classList.add('hidden');
+        };
 
         function render() {
             const isAdmin = role === 'admin';
             document.getElementById('addSchedBtn').classList.toggle('hidden', !isAdmin);
-            // Render โค้ดส่วนแสดงผล... (ใช้ logic เดียวกับก่อนหน้า)
+            // ส่วนแสดงผลรายการ...
         }
-        // ... (ส่วนการดึงข้อมูลจาก Firebase ตามเดิม)
     </script>
 </body>
 </html>
