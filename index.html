@@ -5,111 +5,214 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Class & Homework Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/khanitthayodbundit-eng/homework/refs/heads/main/icon.png">
+    <meta name="apple-mobile-web-app-title" content="ตารางเรียนม.2/4">
+    <link class="ios-icon" rel="apple-touch-icon" href="https://raw.githubusercontent.com/khanitthayodbundit-eng/homework/refs/heads/main/icon.png">
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB5ufCK1MfakgMnfE9B0ZnQLlTUfpnDirQ",
+            authDomain: "myhomework-4621e.firebaseapp.com",
             databaseURL: "https://myhomework-4621e-default-rtdb.firebaseio.com",
-            projectId: "myhomework-4621e"
+            projectId: "myhomework-4621e",
+            storageBucket: "myhomework-4621e.firebasestorage.app",
+            messagingSenderId: "993446656066",
+            appId: "1:993446656066:web:11174ba8bc0e9ff44095db",
+            measurementId: "G-Q5KH4YZ1LD"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+
         window.db = db;
         window.dbRef = ref;
         window.dbSet = set;
+        window.dbPush = push;
         window.dbOnValue = onValue;
         window.dbRemove = remove;
         window.dbUpdate = update;
-        window.dispatchEvent(new Event('firebase-ready'));
     </script>
 </head>
-<body class="bg-slate-100 min-h-screen p-4">
+<body class="bg-slate-100 min-h-screen p-4 md:p-6 flex flex-col justify-between">
 
     <div class="max-w-4xl mx-auto w-full mb-6">
         <header class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-slate-800">📅 Class & Homework Tracker</h1>
+                <p class="text-sm text-gray-500">ตารางเรียน ชั้น ม. 2/4 ห้องประจำ 646</p>
             </div>
             <div class="flex gap-2 w-full sm:w-auto">
-                <button id="openScheduleBtn" onclick="window.openModal('scheduleModal')" class="bg-amber-500 text-white px-4 py-2 rounded-xl hidden"> + เพิ่มวิชาเรียน</button>
-                <button onclick="window.openModal('homeworkModal')" class="bg-indigo-600 text-white px-4 py-2 rounded-xl"> + เพิ่มการบ้าน</button>
+                <button id="openScheduleBtn" onclick="window.openModal('scheduleModal')" class="flex-1 sm:flex-initial bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2.5 rounded-xl shadow-md transition cursor-pointer text-sm hidden">
+                    + เพิ่มวิชาเรียน
+                </button>
+                <button id="openHomeworkBtn" onclick="window.openModal('homeworkModal')" class="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-xl shadow-md transition cursor-pointer text-sm">
+                    + เพิ่มการบ้าน
+                </button>
             </div>
         </header>
 
-        <nav class="flex bg-white p-2 rounded-2xl shadow-md mb-6 overflow-x-auto gap-2">
-            <button onclick="window.selectDay('Monday')" class="day-tab flex-1 py-3 text-xs font-black">จันทร์</button>
-            <button onclick="window.selectDay('Tuesday')" class="day-tab flex-1 py-3 text-xs font-black">อังคาร</button>
-            <button onclick="window.selectDay('Wednesday')" class="day-tab flex-1 py-3 text-xs font-black">พุธ</button>
-            <button onclick="window.selectDay('Thursday')" class="day-tab flex-1 py-3 text-xs font-black">พฤหัสฯ</button>
-            <button onclick="window.selectDay('Friday')" class="day-tab flex-1 py-3 text-xs font-black">ศุกร์</button>
+        <nav class="flex bg-white p-2 rounded-2xl shadow-md mb-6 overflow-x-auto gap-2 border border-slate-200">
+            <button onclick="window.selectDay('Monday')" id="tab-Monday" class="day-tab flex-1 min-w-[95px] text-center py-3 rounded-xl font-black text-xs transition-all duration-200 cursor-pointer">💛 จันทร์</button>
+            <button onclick="window.selectDay('Tuesday')" id="tab-Tuesday" class="day-tab flex-1 min-w-[95px] text-center py-3 rounded-xl font-black text-xs transition-all duration-200 cursor-pointer">💗 อังคาร</button>
+            <button onclick="window.selectDay('Wednesday')" id="tab-Wednesday" class="day-tab flex-1 min-w-[95px] text-center py-3 rounded-xl font-black text-xs transition-all duration-200 cursor-pointer">💚 พุธ</button>
+            <button onclick="window.selectDay('Thursday')" id="tab-Thursday" class="day-tab flex-1 min-w-[95px] text-center py-3 rounded-xl font-black text-xs transition-all duration-200 cursor-pointer">🧡 พฤหัสฯ</button>
+            <button onclick="window.selectDay('Friday')" id="tab-Friday" class="day-tab flex-1 min-w-[95px] text-center py-3 rounded-xl font-black text-xs transition-all duration-200 cursor-pointer">💙 ศุกร์</button>
         </nav>
 
         <main class="grid grid-cols-1 md:grid-cols-5 gap-6">
-            <section class="md:col-span-2 bg-white p-5 rounded-2xl shadow-sm"><h2 class="font-bold mb-4">📖 ตารางเรียน</h2><div id="scheduleList" class="space-y-3"></div></section>
-            <section class="md:col-span-3 bg-white p-5 rounded-2xl shadow-sm"><h2 class="font-bold mb-4">🔥 การบ้าน</h2><div id="homeworkList" class="space-y-3"></div></section>
+            <section class="md:col-span-2 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-gray-800 mb-4">📖 ตารางเรียน</h2>
+                <div id="scheduleList" class="space-y-3"></div>
+            </section>
+            <section class="md:col-span-3 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-gray-800 mb-4">🔥 การบ้าน/ภารกิจ</h2>
+                <div id="homeworkList" class="space-y-3"></div>
+            </section>
         </main>
     </div>
 
-    <footer class="text-center py-6">
-        <select id="userRoleSelect" onchange="window.changeUserRole(this.value)" class="text-xs p-2 rounded-lg border">
-            <option value="student">👤 ผู้ใช้ทั่วไป</option>
-            <option value="admin">👑 Admin</option>
-        </select>
-    </footer>
+    <div id="scheduleModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <h3 id="scheduleModalTitle" class="text-lg font-bold mb-4">📖 เพิ่มวิชาเรียน</h3>
+            <form id="scheduleForm" onsubmit="window.scheduleForm_submit(event)">
+                <input type="hidden" id="scheduleId">
+                <div class="space-y-4">
+                    <select id="scheduleDay" class="w-full text-sm p-2 rounded-lg border border-slate-200" required>
+                        <option value="Monday">วันจันทร์</option><option value="Tuesday">วันอังคาร</option>
+                        <option value="Wednesday">วันพุธ</option><option value="Thursday">วันพฤหัสบดี</option>
+                        <option value="Friday">วันศุกร์</option>
+                    </select>
+                    <input type="text" id="scheduleCode" class="w-full text-sm p-2 rounded-lg border border-slate-200" placeholder="รหัสวิชา (เช่น ท22101)">
+                    <input type="text" id="scheduleName" class="w-full text-sm p-2 rounded-lg border border-slate-200" placeholder="ชื่อวิชา" required>
+                    <input type="text" id="scheduleTeacher" class="w-full text-sm p-2 rounded-lg border border-slate-200" placeholder="ชื่อครู">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="time" id="scheduleStart" class="w-full text-sm p-2 rounded-lg border border-slate-200" required>
+                        <input type="time" id="scheduleEnd" class="w-full text-sm p-2 rounded-lg border border-slate-200" required>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-6">
+                    <button type="button" onclick="window.closeModal('scheduleModal')" class="flex-1 py-2 text-sm bg-slate-100 rounded-xl">ยกเลิก</button>
+                    <button type="submit" class="flex-1 py-2 text-sm text-white bg-amber-500 rounded-xl">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <div id="scheduleModal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden"><div class="bg-white p-6 rounded-2xl w-full max-w-sm"><h3 class="font-bold mb-4">วิชาเรียน</h3><form id="scheduleForm" onsubmit="window.scheduleForm_submit(event)"><input type="hidden" id="scheduleId"><input type="text" id="scheduleName" class="w-full p-2 border rounded-lg mb-2" placeholder="ชื่อวิชา" required><div class="flex gap-2 mt-4"><button type="button" onclick="window.closeModal('scheduleModal')">ยกเลิก</button><button type="submit" class="bg-amber-500 text-white px-4 py-2 rounded-lg">บันทึก</button></div></form></div></div>
-    <div id="homeworkModal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden"><div class="bg-white p-6 rounded-2xl w-full max-w-sm"><h3 class="font-bold mb-4">การบ้าน</h3><form id="homeworkForm" onsubmit="window.homeworkForm_submit(event)"><textarea id="homeworkTitle" class="w-full p-2 border rounded-lg" placeholder="รายละเอียดงาน" required></textarea><div class="flex gap-2 mt-4"><button type="button" onclick="window.closeModal('homeworkModal')">ยกเลิก</button><button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg">บันทึก</button></div></form></div></div>
+    <div id="homeworkModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+            <h3 id="homeworkModalTitle" class="text-lg font-bold mb-4">🔥 เพิ่มการบ้าน</h3>
+            <form id="homeworkForm" onsubmit="window.homeworkForm_submit(event)">
+                <input type="hidden" id="homeworkId">
+                <div class="space-y-4">
+                    <select id="homeworkSubjectSelect" class="w-full text-sm p-2 rounded-lg border border-slate-200" required></select>
+                    <select id="homeworkType" onchange="window.toggleGroupFields(this.value)" class="w-full text-sm p-2 rounded-lg border border-slate-200">
+                        <option value="single">👤 งานเดี่ยว</option><option value="group">👥 งานกลุ่ม</option>
+                    </select>
+                    <div id="groupFields" class="hidden space-y-2">
+                        <input type="number" id="groupMemberCount" class="w-full text-sm p-2 rounded-lg border border-slate-200" placeholder="จำนวนคน">
+                        <textarea id="groupMemberNames" class="w-full text-sm p-2 rounded-lg border border-slate-200" placeholder="รายชื่อสมาชิก"></textarea>
+                    </div>
+                    <select id="homeworkStatus" class="w-full text-sm p-2 rounded-lg border border-slate-200">
+                        <option value="not-started">🔴 ยังไม่เริ่ม</option><option value="in-progress">🟡 กำลังทำ</option><option value="done">🟢 เสร็จแล้ว</option>
+                    </select>
+                    <textarea id="homeworkTitle" class="w-full text-sm p-2 rounded-lg border border-slate-200" placeholder="รายละเอียดงาน" required></textarea>
+                    <input type="date" id="homeworkDeadline" class="w-full text-sm p-2 rounded-lg border border-slate-200" required>
+                </div>
+                <div class="flex gap-2 mt-6">
+                    <button type="button" onclick="window.closeModal('homeworkModal')" class="flex-1 py-2 text-sm bg-slate-100 rounded-xl">ยกเลิก</button>
+                    <button type="submit" class="flex-1 py-2 text-sm text-white bg-indigo-600 rounded-xl">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
-        let currentSelectedDay = 'Monday', schedules = [], homeworks = [];
+        let currentSelectedDay = 'Monday';
+        let schedules = [], homeworks = [];
         let currentUserRole = localStorage.getItem('userRole') || 'student';
 
-        window.changeUserRole = (role) => {
-            currentUserRole = role;
-            localStorage.setItem('userRole', role);
-            updateUI();
+        // --- ฟังก์ชันบันทึกข้อมูล ---
+        window.scheduleForm_submit = function(e) {
+            e.preventDefault();
+            const id = document.getElementById('scheduleId').value || 'sched_' + Date.now();
+            window.dbSet(window.dbRef(window.db, `schedules/${id}`), {
+                day: document.getElementById('scheduleDay').value,
+                code: document.getElementById('scheduleCode').value,
+                name: document.getElementById('scheduleName').value,
+                teacher: document.getElementById('scheduleTeacher').value,
+                start: document.getElementById('scheduleStart').value,
+                end: document.getElementById('scheduleEnd').value
+            }).then(() => { window.closeModal('scheduleModal'); document.getElementById('scheduleForm').reset(); });
         };
 
-        function updateUI() {
-            const isAdmin = currentUserRole === 'admin';
-            document.getElementById('openScheduleBtn').classList.toggle('hidden', !isAdmin);
-            renderAll();
-        }
+        window.homeworkForm_submit = function(e) {
+            e.preventDefault();
+            const id = document.getElementById('homeworkId').value || 'hw_' + Date.now();
+            const type = document.getElementById('homeworkType').value;
+            window.dbSet(window.dbRef(window.db, `homeworks/${id}`), {
+                day: currentSelectedDay,
+                subject: document.getElementById('homeworkSubjectSelect').value,
+                type: type,
+                memberCount: type === 'group' ? document.getElementById('groupMemberCount').value : '',
+                memberNames: type === 'group' ? document.getElementById('groupMemberNames').value : '',
+                status: document.getElementById('homeworkStatus').value,
+                title: document.getElementById('homeworkTitle').value,
+                deadline: document.getElementById('homeworkDeadline').value
+            }).then(() => { window.closeModal('homeworkModal'); document.getElementById('homeworkForm').reset(); });
+        };
 
-        window.scheduleForm_submit = (e) => { e.preventDefault(); const id = document.getElementById('scheduleId').value || 's_'+Date.now(); window.dbSet(window.dbRef(window.db, 'schedules/'+id), { name: document.getElementById('scheduleName').value, day: currentSelectedDay }).then(() => closeModal('scheduleModal')); };
-        window.homeworkForm_submit = (e) => { e.preventDefault(); const id = document.getElementById('homeworkId').value || 'h_'+Date.now(); window.dbSet(window.dbRef(window.db, 'homeworks/'+id), { title: document.getElementById('homeworkTitle').value, day: currentSelectedDay, status: 'pending' }).then(() => closeModal('homeworkModal')); };
-
+        // --- ฟังก์ชันช่วยเหลือ ---
         window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-        window.selectDay = (day) => { currentSelectedDay = day; renderAll(); };
+        window.toggleGroupFields = (type) => document.getElementById('groupFields').classList.toggle('hidden', type !== 'group');
+        
+        window.selectDay = function(day) {
+            currentSelectedDay = day;
+            renderSchedule();
+            renderHomework();
+        };
 
-        function renderAll() {
-            const isAdmin = currentUserRole === 'admin';
-            document.getElementById('scheduleList').innerHTML = schedules.filter(s => s.day === currentSelectedDay).map(s => `
-                <div class="p-3 border-l-4 border-amber-400 bg-amber-50 rounded-xl flex justify-between">
-                    <span>${s.name}</span>
-                    ${isAdmin ? `<button onclick="window.dbRemove(window.dbRef(window.db, 'schedules/${s.id}'))" class="text-red-500">✕</button>` : ''}
-                </div>`).join('');
+        window.toggleHwDone = (id, status) => {
+            window.dbUpdate(window.dbRef(window.db, `homeworks/${id}`), { status: status === 'done' ? 'not-started' : 'done' });
+        };
 
-            document.getElementById('homeworkList').innerHTML = homeworks.filter(h => h.day === currentSelectedDay).map(h => `
-                <div class="p-3 border rounded-xl flex justify-between">
-                    <span>${h.title}</span>
-                    <input type="checkbox" ${h.status==='done'?'checked':''} onclick="window.dbUpdate(window.dbRef(window.db, 'homeworks/${h.id}'), {status: '${h.status==='done'?'pending':'done'}'})">
+        window.deleteHomework = (id) => { if(confirm('ยืนยันการลบ?')) window.dbRemove(window.dbRef(window.db, `homeworks/${id}`)); };
+
+        // --- Render ข้อมูล ---
+        function renderSchedule() {
+            const list = schedules.filter(s => s.day === currentSelectedDay);
+            document.getElementById('scheduleList').innerHTML = list.map(s => `
+                <div class="p-3 border-l-4 border-l-amber-400 bg-amber-50/50 rounded-xl flex justify-between">
+                    <div><p class="font-bold text-sm">${s.name}</p><p class="text-xs">⏰ ${s.start}-${s.end}</p></div>
                 </div>`).join('');
         }
 
-        window.addEventListener('firebase-ready', () => {
-            document.getElementById('userRoleSelect').value = currentUserRole;
-            window.dbOnValue(window.dbRef(window.db, 'schedules'), (s) => { const v=s.val(); schedules=v?Object.keys(v).map(k=>({id:k,...v[k]})):[]; renderAll(); });
-            window.dbOnValue(window.dbRef(window.db, 'homeworks'), (s) => { const v=s.val(); homeworks=v?Object.keys(v).map(k=>({id:k,...v[k]})):[]; renderAll(); });
-            updateUI();
+        function renderHomework() {
+            const list = homeworks.filter(h => h.day === currentSelectedDay);
+            document.getElementById('homeworkList').innerHTML = list.map(h => `
+                <div class="p-4 border rounded-xl flex items-center gap-3">
+                    <input type="checkbox" ${h.status === 'done' ? 'checked' : ''} onclick="window.toggleHwDone('${h.id}', '${h.status}')">
+                    <div class="flex-1"><p class="text-sm font-bold">${h.title}</p><p class="text-xs">ส่ง: ${h.deadline}</p></div>
+                    <button onclick="window.deleteHomework('${h.id}')" class="text-red-500 text-xs">✕</button>
+                </div>`).join('');
+        }
+
+        // --- เริ่มต้นระบบ ---
+        window.dbOnValue(window.dbRef(window.db, 'schedules'), (snap) => {
+            const val = snap.val();
+            schedules = val ? Object.keys(val).map(k => ({id: k, ...val[k]})) : [];
+            renderSchedule();
+        });
+
+        window.dbOnValue(window.dbRef(window.db, 'homeworks'), (snap) => {
+            const val = snap.val();
+            homeworks = val ? Object.keys(val).map(k => ({id: k, ...val[k]})) : [];
+            renderHomework();
         });
     </script>
 </body>
