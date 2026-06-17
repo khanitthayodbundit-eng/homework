@@ -9,7 +9,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ตารางเรียนม.2/4">
-    
     <link class="ios-icon" rel="apple-touch-icon" href="https://raw.githubusercontent.com/khanitthayodbundit-eng/homework/refs/heads/main/icon.png">
 
     <script type="module">
@@ -17,9 +16,9 @@
         import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         // =================================================================
-        // ⚠️ ขั้นตอนสำคัญ: นำรหัส Firebase Config ของคุณมาวางทับตรงนี้แทนที่ของเดิมทั้งหมด!
+        // ⚠️ อย่าลืมนำรหัส Firebase Config ของคุณมาวางทับตรงนี้แทนที่ข้อความภาษาไทยนะครับ
         // =================================================================
-        const firebaseConfig = {
+      const firebaseConfig = {
   apiKey: "AIzaSyB5ufCK1MfakgMnfE9B0ZnQLlTUfpnDirQ",
   authDomain: "myhomework-4621e.firebaseapp.com",
   databaseURL: "https://myhomework-4621e-default-rtdb.firebaseio.com",
@@ -34,7 +33,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // สั่งให้ตัวแปรเหล่านี้ใช้งานได้ทั่วทั้งหน้าเว็บ
         window.db = db;
         window.dbRef = ref;
         window.dbSet = set;
@@ -222,27 +220,41 @@
             Friday:    { active: 'bg-sky-500 text-white border-sky-600 scale-105', border: 'border-l-sky-500', bg: 'bg-sky-50/50' }
         };
 
-        // เริ่มต้นการดึงข้อมูลและเฝ้าฟังการอัปเดตจาก Firebase (Realtime Sync)
+        // 📚 ข้อมูลวิชาเรียนตัวอย่างชุดตั้งต้นสำหรับสร้างถังตารางข้อมูลบนคลาวด์ครั้งแรก
+        const defaultSchedules = [
+            { id: "default_1", day: "Monday", code: "ท22101", name: "ภาษาไทย", teacher: "ครูยุทธพงศ์", start: "08:30", end: "09:20" },
+            { id: "default_2", day: "Wednesday", code: "ENG_SCI", name: "English Science", teacher: "ครู Stephani", start: "08:20", end: "09:10" }
+        ];
+
         function initFirebaseListeners() {
-            // เช็คว่า Firebase พร้อมทำงายหรือยัง
             if (!window.db) {
                 setTimeout(initFirebaseListeners, 500);
                 return;
             }
 
-            // 1. ดึงข้อมูลตารางเรียน
+            // ฟังเฝ้าการอัปเดตตารางเรียน
             window.dbOnValue(window.dbRef(window.db, 'schedules'), (snapshot) => {
                 const data = snapshot.val();
-                schedules = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+                
+                if (!data) {
+                    // 💡 ไม้ตาย: ถ้า Firebase โล่งและว่างเปล่า ให้ระบบดันข้อมูลตั้งต้นชุดนี้เข้าไปเปิดซิงคลาวด์ให้ทันที!
+                    defaultSchedules.forEach(item => {
+                        window.dbSet(window.dbRef(window.db, `schedules/${item.id}`), {
+                            day: item.day, code: item.code, name: item.name, teacher: item.teacher, start: item.start, end: item.end
+                        });
+                    });
+                    return;
+                }
+
+                schedules = Object.keys(data).map(key => ({ id: key, ...data[key] }));
                 renderSchedule();
                 updateHomeworkSubjectSelect();
             });
 
-            // 2. ดึงข้อมูลการบ้าน
+            // ฟังเฝ้าการอัปเดตการบ้าน
             window.dbOnValue(window.dbRef(window.db, 'homeworks'), (snapshot) => {
                 const data = snapshot.val();
                 homeworks = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
-                // เรียงลำดับการบ้านล่าสุดขึ้นก่อนตาม ID (Timestamp)
                 homeworks.sort((a,b) => b.id.localeCompare(a.id));
                 renderHomework();
             });
@@ -303,7 +315,6 @@
             updateHomeworkSubjectSelect();
         }
 
-        // บันทึกตารางเรียนไปยัง Firebase
         document.getElementById('scheduleForm').addEventListener('submit', (e) => {
             e.preventDefault();
             if (currentUserRole !== 'admin') return alert('สิทธิ์ของคุณไม่สามารถแก้ไขตารางเรียนได้');
@@ -321,10 +332,8 @@
             };
 
             if (idValue) {
-                // แก้ไขข้อมูลเก่า
                 window.dbSet(window.dbRef(window.db, `schedules/${idValue}`), classData);
             } else {
-                // เพิ่มข้อมูลใหม่แบบสุ่ม Key
                 const newRef = window.dbPush(window.dbRef(window.db, 'schedules'));
                 window.dbSet(newRef, classData);
             }
@@ -348,7 +357,6 @@
             openModal('scheduleModal');
         }
 
-        // บันทึกการบ้านไปยัง Firebase
         document.getElementById('homeworkForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const hwId = document.getElementById('hwIdInput').value;
@@ -370,7 +378,6 @@
             if (hwId) {
                 window.dbSet(window.dbRef(window.db, `homeworks/${hwId}`), hwData);
             } else {
-                // ใส่ Timestamp ลบด้วยเวลาปัจจุบันเพื่อให้จัดเรียงง่าย
                 const customKey = 'hw_' + Date.now();
                 window.dbSet(window.dbRef(window.db, `homeworks/${customKey}`), hwData);
             }
@@ -383,7 +390,6 @@
             updateHomeworkSubjectSelect();
             document.getElementById('hwIdInput').value = hw.id;
             document.getElementById('hwSubjectSelect').value = `${hw.subject}|${hw.teacher}`;
-            
             document.querySelector(`input[name="workType"][value="${hw.type}"]`).checked = true;
             toggleGroupFields(hw.type);
             
@@ -456,14 +462,12 @@
                 if (h.type === 'group') {
                     const sizeLabel = h.groupSize === 'ทั้งห้อง' ? 'ทั้งห้อง' : `${h.groupSize} คน`;
                     typeBadge = `<span class="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-purple-200">👥 กลุ่ม (${sizeLabel})</span>`;
-                    
                     if (h.groupMembers) {
                         groupDetailsHTML = `
                             <div class="bg-purple-50/50 border border-purple-100 p-2 rounded-xl text-xs mt-1.5">
                                 <span class="font-bold text-purple-800">สมาชิก:</span> 
                                 <span class="text-slate-600 font-medium">${h.groupMembers}</span>
-                            </div>
-                        `;
+                            </div>`;
                     }
                 } else {
                     typeBadge = `<span class="bg-teal-100 text-teal-800 text-[10px] font-extrabold px-2 py-0.5 rounded-md border border-teal-200">👤 เดี่ยว</span>`;
@@ -527,7 +531,6 @@
             changeUserRole(currentUserRole);
         }
 
-        // เริ่มระบายหน้าต่างทำงาน
         setupDefaultDayByCurrentDate();
         selectDay(currentSelectedDay);
         initUserRole();
