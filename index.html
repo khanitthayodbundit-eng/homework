@@ -209,7 +209,9 @@
 
     <script>
         let currentSelectedDay = 'Monday';
-        let currentUserRole = localStorage.getItem('userRole') || 'student';
+        // Shared Admin password gate. This is a client-side convenience check only.
+        const ADMIN_PASSWORD = 'poiu0987';
+        let currentUserRole = 'student';
         
         let schedules = [];
         let homeworks = [];
@@ -255,10 +257,23 @@
         }
 
         function changeUserRole(role) {
-            currentUserRole = role;
-            localStorage.setItem('userRole', role);
+            if (role === 'admin') {
+                const enteredPassword = window.prompt('กรุณาใส่รหัสผ่าน Admin');
+                if (enteredPassword !== ADMIN_PASSWORD) {
+                    currentUserRole = 'student';
+                    document.getElementById('userRoleSelect').value = 'student';
+                    document.getElementById('openScheduleBtn').classList.add('hidden');
+                    if (enteredPassword !== null) alert('รหัสผ่านไม่ถูกต้อง');
+                    renderSchedule();
+                    renderHomework();
+                    return;
+                }
+            }
+
+            currentUserRole = role === 'admin' ? 'admin' : 'student';
+            document.getElementById('userRoleSelect').value = currentUserRole;
             const openScheduleBtn = document.getElementById('openScheduleBtn');
-            if (role === 'admin') openScheduleBtn.classList.remove('hidden');
+            if (currentUserRole === 'admin') openScheduleBtn.classList.remove('hidden');
             else openScheduleBtn.classList.add('hidden');
             renderSchedule();
             renderHomework();
@@ -320,33 +335,68 @@
                 day: inputDay
             };
 
+            const saveButton = document.getElementById('scheduleSubmitBtn');
+            saveButton.disabled = true;
+            saveButton.innerText = 'กำลังบันทึก...';
+
+            let savePromise;
             if (idValue) {
-                // แก้ไขข้อมูลเก่า
-                window.dbSet(window.dbRef(window.db, `schedules/${idValue}`), classData);
+                // แก้ไขข้อมูลเดิมด้วย Firebase key เดิม ไม่สร้างรายการใหม่
+                savePromise = window.dbSet(window.dbRef(window.db, `schedules/${idValue}`), classData);
             } else {
                 // เพิ่มข้อมูลใหม่แบบสุ่ม Key
                 const newRef = window.dbPush(window.dbRef(window.db, 'schedules'));
-                window.dbSet(newRef, classData);
+                savePromise = window.dbSet(newRef, classData);
             }
-            closeModal('scheduleModal');
-            selectDay(inputDay);
+
+            Promise.resolve(savePromise)
+                .then(() => {
+                    closeModal('scheduleModal');
+                    selectDay(inputDay);
+                })
+                .catch((error) => {
+                    console.error('บันทึกรายวิชาไม่สำเร็จ:', error);
+                    alert('บันทึกข้อมูลไม่สำเร็จ: ' + (error.message || 'กรุณาตรวจสอบการเชื่อมต่อหรือสิทธิ์ Firebase'));
+                })
+                .finally(() => {
+                    saveButton.disabled = false;
+                    saveButton.innerText = idValue ? 'บันทึกการแก้ไข' : 'บันทึกวิชา';
+                });
         });
 
+        // เปิดหน้าต่างแก้ไขรายวิชา โดยค้นหาข้อมูลจาก Firebase ที่โหลดไว้
         function openEditSchedule(id) {
-            if (currentUserRole !== 'admin') return;
-            const currentClass = schedules.find(c => c.id === id);
-            if (!currentClass) return;
+            if (currentUserRole !== 'admin') {
+                alert('กรุณาเปลี่ยนสิทธิ์เป็น Admin ก่อนแก้ไขรายวิชา');
+                return;
+            }
+            const currentClass = schedules.find(c => String(c.id) === String(id));
+            if (!currentClass) {
+                alert('ไม่พบข้อมูลรายวิชานี้ กรุณารอสักครู่แล้วลองใหม่');
+                return;
+            }
+
+            document.getElementById('scheduleForm').reset();
             document.getElementById('classIdInput').value = currentClass.id;
-            document.getElementById('classDayInput').value = currentClass.day;
-            document.getElementById('classCodeInput').value = currentClass.code;
-            document.getElementById('classNameInput').value = currentClass.name;
-            document.getElementById('classTeacherInput').value = currentClass.teacher === 'ไม่ระบุชื่อครู' ? '' : currentClass.teacher;
-            document.getElementById('startTimeInput').value = currentClass.start;
-            document.getElementById('endTimeInput').value = currentClass.end;
+            document.getElementById('classDayInput').value = currentClass.day || currentSelectedDay;
+            document.getElementById('classCodeInput').value = currentClass.code || '';
+            document.getElementById('classNameInput').value = currentClass.name || '';
+            document.getElementById('classTeacherInput').value = currentClass.teacher === 'ไม่ระบุชื่อครู' ? '' : (currentClass.teacher || '');
+            document.getElementById('startTimeInput').value = currentClass.start || '';
+            document.getElementById('endTimeInput').value = currentClass.end || '';
             document.getElementById('scheduleModalTitle').innerText = '✏️ แก้ไขข้อมูลวิชาเรียน';
             document.getElementById('scheduleSubmitBtn').innerText = 'บันทึกการแก้ไข';
             openModal('scheduleModal');
         }
+
+        // ใช้ Event Delegation เพื่อให้ปุ่มที่สร้างภายหลังด้วย innerHTML ทำงานได้แน่นอน
+        document.getElementById('scheduleList').addEventListener('click', (event) => {
+            const button = event.target.closest('button[data-schedule-action]');
+            if (!button) return;
+            const id = button.dataset.scheduleId;
+            if (button.dataset.scheduleAction === 'edit') openEditSchedule(id);
+            if (button.dataset.scheduleAction === 'delete') deleteSchedule(id);
+        });
 
         // บันทึกการบ้านไปยัง Firebase
         document.getElementById('homeworkForm').addEventListener('submit', (e) => {
@@ -418,8 +468,8 @@
                 const codeBadge = c.code ? `<span class="bg-slate-200 text-slate-700 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded mr-1.5">${c.code}</span>` : '';
                 const adminControls = currentUserRole === 'admin' ? `
                     <div class="flex items-center gap-2 shrink-0">
-                        <button onclick="openEditSchedule('${c.id}')" class="text-slate-400 hover:text-indigo-600 text-sm p-1">✏️</button>
-                        <button onclick="deleteSchedule('${c.id}')" class="text-gray-300 hover:text-red-500 text-xs font-bold p-1">✕</button>
+                        <button type="button" data-schedule-action="edit" data-schedule-id="${c.id}" aria-label="แก้ไขรายวิชา" title="แก้ไขรายวิชา" class="text-slate-400 hover:text-indigo-600 text-sm p-1">✏️</button>
+                        <button type="button" data-schedule-action="delete" data-schedule-id="${c.id}" aria-label="ลบรายวิชา" title="ลบรายวิชา" class="text-gray-300 hover:text-red-500 text-xs font-bold p-1">✕</button>
                     </div>` : '';
                 return `
                     <div class="p-3 ${currentDayColor.bg} border-l-4 ${currentDayColor.border} rounded-xl flex justify-between items-center shadow-xs">
@@ -523,8 +573,10 @@
         }
 
         function initUserRole() {
-            document.getElementById('userRoleSelect').value = currentUserRole;
-            changeUserRole(currentUserRole);
+            // Always start as a regular user; Admin must enter the password each time.
+            currentUserRole = 'student';
+            document.getElementById('userRoleSelect').value = 'student';
+            changeUserRole('student');
         }
 
         // เริ่มระบายหน้าต่างทำงาน
